@@ -48,10 +48,6 @@ class ColumnSelector(BaseEstimator, TransformerMixin):
     
 
     
-    
-    
-    
-    
 class sampleTransformer(BaseEstimator, TransformerMixin):
     """sample way of building things
     """
