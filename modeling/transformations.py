@@ -46,6 +46,89 @@ class ColumnSelector(BaseEstimator, TransformerMixin):
         return df
     
     
+def featureEngineering(dg):
+'''  
+better do this:
+https://scikit-learn.org/stable/auto_examples/preprocessing/plot_function_transformer.html#sphx-glr-auto-examples-preprocessing-plot-function-transformer-py
+'''
+    df = dg.copy()
+    columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+    listToStats = lambda x: [max(x), min(x), np.mean(x), np.std(x), np.median(x)]
+    timeToFeatures = lambda x: [1,2,3,4,5,6,7] # these could even be categorical.
+
+    for col in columns:
+        df[col] = df[col].apply(listToStats)
+    
+    df['dateTime'] = df.index.map(timeToFeatures)
+    return df
+
+
+def myScaler(dg):
+'''  
+better do this:
+https://scikit-learn.org/stable/auto_examples/preprocessing/plot_function_transformer.html#sphx-glr-auto-examples-preprocessing-plot-function-transformer-py
+'''
+    df = dg.copy()
+    df['currentValue'] = df.Close.apply(lambda x: x[-1])
+    df['currentVolume'] = df.Volume.apply(lambda x: x[-1])
+    dg['Volume']=dg.apply(lambda x: np.array(x['Volume'])/x.currentVolume, axis=1)
+    for col in ['Open', 'High', 'Low', 'Close']:
+        dg[col]=dg.apply(lambda x: np.array(x[col])/x.currentValue, axis=1)
+
+    df = dg.apply(lambda x: np.array(x.pastLow)/x.currentValue, axis=1)
+    df = df.drop(columns = ['currentValue', 'currentVolume'])
+    return df
+
+
+
+
+
+class BayesianCategoricalEncoder(TransformerMixin):  
+    """Label encodes all the columns of a dataframe.
+ 
+    Args:
+        df
+        
+    Returns:
+        DataFrame with object dtypes label-encoded. Notice that this is not just a
+        typical Label Encoder. For each categorical column in the data frame, the levels
+        are encoded proporcional to how much transaction revenue they generate. 
+        
+        For example, as 
+        (avg spent in USA) > (avg spent in Great Britain) > (avg spent spent in Argentina)
+        the encoded labels of USA, Great Britain and Argentina are expected to preserve 
+        the same order
+ 
+    Notes:
+        BayesianCategoricalEncoder is a bad name for this class. Apparently this type of encoders has a name
+        potential improvement: add an option that creates another column with the 'support' of the quotient.
+    """
+
+    def __init__(self, colsToEncode=None):
+        self.colsToEncode = colsToEncode
+
+    def fit(self, X, y):
+        df = X.select_dtypes(include='object').copy()
+
+        if self.colsToEncode ==None:
+            self.categorical_columns = list(df.columns)
+        else:
+            self.categorical_columns = self.colsToEncode
+
+        self.level_dictionary={}
+        df['target']=y
+        for col in self.categorical_columns:
+            importance = df.groupby(col)['target'].agg([np.sum, np.size])
+            self.level_dictionary[col] = 1.0*importance['sum']/(importance['size']) 
+        return self
+    
+    def transform(self, X):
+        df=pd.DataFrame(index=X.index)
+        dictionary = self.level_dictionary
+        for col in self.categorical_columns:
+            df[col] = X[col].apply(lambda x: dictionary[col][x] if x in dictionary[col].index else None)
+        return df
+
 
     
 class sampleTransformer(BaseEstimator, TransformerMixin):
