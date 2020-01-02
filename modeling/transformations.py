@@ -31,6 +31,7 @@ def featureEngineering(df):
     listToStats = lambda x: [listTransforms[trf](x) for trf in listTransforms]
     statsNames = list(listTransforms.keys())
 
+    # the following line was commented to check if we are overfiting
     timeTransforms = {'hour': (lambda x: x.hour), 'tenminute': (lambda x: x.minute//10)}
     timeToStats = lambda x: [timeTransforms[trf](x) for trf in timeTransforms]
     timeFeatureNames = list(timeTransforms.keys())

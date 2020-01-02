@@ -17,7 +17,8 @@ def createTrainingDataSet(ds, numPastMins=5, numFutureMins=5):
     dt = pivotWindow(ds, -1, end, columns=['High']) #[-1,-2,-3,-4,-5]
     futureHigh = dt.High.apply(max)
     currentValue = df.Close.apply(lambda x: x[-1])
-    df['target']= (futureHigh>currentValue)
+    increase = (futureHigh-currentValue).div(currentValue)
+    df['target']= increase>increase.median()
     df['validTarget']=dt.validRow
     df = df[(df.validTarget==True) & (df.validRow==True)].drop(columns=['validTarget', 'validRow'])
     return df
