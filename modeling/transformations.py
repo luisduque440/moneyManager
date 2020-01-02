@@ -1,34 +1,12 @@
 import pandas as pd
 import numpy as np
+from sklearn.base import BaseEstimator, TransformerMixin
 
-
-error_msg_column_list_is_not_valid = "the list of columns has repeated elements"
-error_msg_column_not_found = 'the data frame is missing column %s'
 
 
 class ColumnSelector(BaseEstimator, TransformerMixin):
     """Transformation used to explicitly learn or select the columns from a data frame.
-    The columns could be explicitly selected or they could be learnt from another data frame
-    as in the following examples
-    
-    Example 1
-        >> from pipeline_utilities import ColumnSelector
-        >> df = pd.DataFrame({'A':['May', 'August', 'Jun'],'B':[4, 3, 4],'C':[5.0, 8.0, 1.0]})
-        >> ColumnSelector(columns= ['A', 'C']).transform(df)
-        0  May      5.0
-        1  August   8.0
-        2  Jun      1.0
-        
-        
-        
-    Example 2
-        >> from pipeline_utilities import ColumnSelector
-        >> df = pd.DataFrame({'A':['House', 'Star'], 'C':[1.0, 2.0, 1.0]})
-        >> dg = pd.DataFrame({'A':['May', 'August', 'Jun'],'B':[4, 3, 4],'C':[5.0, 8.0, 1.0]})
-        >> ColumnSelector().fit(df).transform(dg)
-        0  May      5.0
-        1  August   8.0
-        2  Jun      1.0
+    The columns could be explicitly selected or learnt from another data frame
     """
     
     def __init__(self, columns=None):
@@ -36,48 +14,46 @@ class ColumnSelector(BaseEstimator, TransformerMixin):
     
     def fit(self, X, y=None):
         if self.columns==None: self.columns = list(X.columns)
-        assert len(self.columns)==len(set(self.columns)), error_msg_column_list_is_not_valid
         return self
         
     def transform(self, X):
-        if len(self.columns)==0: return pd.DataFrame()
-        for c in self.columns: assert c in list(X.columns), error_msg_column_not_found %(c)
+        for c in self.columns: assert c in list(X.columns), "the data frame is missing column %s" %(c)
         df = X[self.columns].copy()
         return df
     
     
-def featureEngineering(dg):
-'''  
-better do this:
-https://scikit-learn.org/stable/auto_examples/preprocessing/plot_function_transformer.html#sphx-glr-auto-examples-preprocessing-plot-function-transformer-py
-'''
-    df = dg.copy()
-    columns = ['Open', 'High', 'Low', 'Close', 'Volume']
+def featureEngineering(df):
+    """ better do this:
+    https://scikit-learn.org/stable/auto_examples/preprocessing/plot_function_transformer.html#sphx-glr-auto-examples-preprocessing-plot-function-transformer-py
+    """
     listToStats = lambda x: [max(x), min(x), np.mean(x), np.std(x), np.median(x)]
-    timeToFeatures = lambda x: [1,2,3,4,5,6,7] # these could even be categorical.
-
-    for col in columns:
+    statsNames = ['max', 'min', 'mean', 'std', 'median']
+    for col in df.columns: 
         df[col] = df[col].apply(listToStats)
-    
+    timeToFeatures = lambda x: [45, 69] # these could even be categorical.
     df['dateTime'] = df.index.map(timeToFeatures)
+    df = df.apply(lambda x: pd.Series(sum(x.values, [])), axis=1)
+
+    newColnames = []
+    for col in df.columns:
+        newColnames = newColnames + [str(col)+str(stat) for stat in statsNames]
+
+    df.columns = list(newColnames)
+
+    #df.columns = ['feat_%s'%(i) for i in range(df.shape[1])]
     return df
 
 
-def myScaler(dg):
-'''  
-better do this:
-https://scikit-learn.org/stable/auto_examples/preprocessing/plot_function_transformer.html#sphx-glr-auto-examples-preprocessing-plot-function-transformer-py
-'''
-    df = dg.copy()
+def timeSeriesScaler(df):
+    """ better do this:
+    https://scikit-learn.org/stable/auto_examples/preprocessing/plot_function_transformer.html#sphx-glr-auto-examples-preprocessing-plot-function-transformer-py
+    """
     df['currentValue'] = df.Close.apply(lambda x: x[-1])
     df['currentVolume'] = df.Volume.apply(lambda x: x[-1])
-    dg['Volume']=dg.apply(lambda x: np.array(x['Volume'])/x.currentVolume, axis=1)
+    df['Volume']=df.apply(lambda x: np.array(x['Volume'])/x.currentVolume, axis=1)
     for col in ['Open', 'High', 'Low', 'Close']:
-        dg[col]=dg.apply(lambda x: np.array(x[col])/x.currentValue, axis=1)
-
-    df = dg.apply(lambda x: np.array(x.pastLow)/x.currentValue, axis=1)
-    df = df.drop(columns = ['currentValue', 'currentVolume'])
-    return df
+        df[col]=df.apply(lambda x: np.array(x[col])/x.currentValue, axis=1)
+    return df.drop(columns = ['currentValue', 'currentVolume'])
 
 
 
