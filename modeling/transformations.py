@@ -26,21 +26,26 @@ def featureEngineering(df):
     """ better do this:
     https://scikit-learn.org/stable/auto_examples/preprocessing/plot_function_transformer.html#sphx-glr-auto-examples-preprocessing-plot-function-transformer-py
     """
-    listToStats = lambda x: [max(x), min(x), np.mean(x), np.std(x), np.median(x)]
-    statsNames = ['max', 'min', 'mean', 'std', 'median']
-    for col in df.columns: 
+
+    colnames = df.columns
+    listTransforms = {'max': max, 'min': min, 'mean':np.mean, 'std': np.std, 'median': np.median}
+    listToStats = lambda x: [listTransforms[trf](x) for trf in listTransforms]
+    statsNames = list(listTransforms.keys())
+
+    timeTransforms = {'hour': (lambda x: x.hour), 'tenminute': (lambda x: x.minute//10)}
+    timeToStats = lambda x: [timeTransforms[trf](x) for trf in timeTransforms]
+    timeFeatureNames = list(timeTransforms.keys())
+
+    for col in colnames: 
         df[col] = df[col].apply(listToStats)
-    timeToFeatures = lambda x: [45, 69] # these could even be categorical.
-    df['dateTime'] = df.index.map(timeToFeatures)
+
+    df['dateTime'] = df.index.map(timeToStats)
     df = df.apply(lambda x: pd.Series(sum(x.values, [])), axis=1)
 
-    newColnames = []
-    for col in df.columns:
-        newColnames = newColnames + [str(col)+str(stat) for stat in statsNames]
-
-    df.columns = list(newColnames)
-
-    #df.columns = ['feat_%s'%(i) for i in range(df.shape[1])]
+    featureNames = []
+    for col in colnames:
+        featureNames = featureNames + [str(col)+'_'+str(stat) for stat in statsNames]
+    df.columns = (featureNames + timeFeatureNames)
     return df
 
 
