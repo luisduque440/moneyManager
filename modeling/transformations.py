@@ -26,9 +26,8 @@ def featureEngineering(df):
     """ better do this:
     https://scikit-learn.org/stable/auto_examples/preprocessing/plot_function_transformer.html#sphx-glr-auto-examples-preprocessing-plot-function-transformer-py
     """
-
     colnames = df.columns
-    listTransforms = {'max': max, 'min': min, 'mean':np.mean, 'std': np.std, 'median': np.median}
+    listTransforms = {'max': max, 'argmax':np.argmax, 'min': min, 'argmin':np.argmin, 'mean':np.mean, 'std': np.std, 'median': np.median}
     listToStats = lambda x: [listTransforms[trf](x) for trf in listTransforms]
     statsNames = list(listTransforms.keys())
 
@@ -109,6 +108,34 @@ class BayesianCategoricalEncoder(TransformerMixin):
         for col in self.categorical_columns:
             df[col] = X[col].apply(lambda x: dictionary[col][x] if x in dictionary[col].index else None)
         return df
+
+
+
+
+class TransformationWrapper(BaseEstimator, TransformerMixin):
+	"""Scaler wrapper to have pandas compatibility.
+
+	Example
+	    >> dg = pd.DataFrame({'A':[0.5, 0.6, 0.7]})
+	    >> NumericFeaturesScaler(scaler = MinMaxScaler()).fit(dg).transform(dg)
+	    0  0.0
+	    1  0.5
+	    2  1.0
+
+	Attributes:
+	    scaler: scaler class from scikit-learn, optional, default MinMaxScaler()
+	"""
+	def __init__(self, transformation):
+		self.transformation = transformation
+
+	def fit(self, X, y=None):
+		self.transformation.fit(X)
+		return self
+
+	def transform(self, X):
+		return pd.DataFrame(self.transformation.transform(X), columns = X.columns, index=X.index)
+
+
 
 
     
