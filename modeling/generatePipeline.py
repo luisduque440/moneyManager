@@ -16,6 +16,6 @@ def generatePipeline():
 	    ('featurengineering', FunctionTransformer(featureEngineering)),
 	    # more feature engineering: bayesianEncoder for time, pca, log transformations, blah blah.
 	    ('scaler', TransformationWrapper(MinMaxScaler())), ## the columns are lost :( put my own.
-	    ('classifier', LogisticRegression(penalty='none', solver='sag')) # consider : LogisticRegressionCV
+	    ('classifier', LogisticRegression(penalty='none', solver='sag', max_iter=1000)) # consider : LogisticRegressionCV
 	])
 	return pipeline

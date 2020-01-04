@@ -21,13 +21,21 @@ class ColumnSelector(BaseEstimator, TransformerMixin):
         df = X[self.columns].copy()
         return df
     
-    
+# ##### Notes
+# E.g. for a univariate time series 𝑦𝑖, you would use 𝑦𝑖 as response and e.g. the following features:
+# Lagged versions 𝑦𝑖−1, 𝑦𝑖−2, 𝑦𝑖−3 etc.
+# Differences of appropriate order, e.g. 𝑦𝑖−1−𝑦𝑖−2, 𝑦𝑖−1−𝑦𝑖−8 (if there is weekly seasonality expected and the observations occur daily) etc.
+# Integer or dummy coded periodic time info such as month in year, week day, hour of day, minute in hour etc.
+
+
+
+
 def featureEngineering(df):
     """ better do this:
     https://scikit-learn.org/stable/auto_examples/preprocessing/plot_function_transformer.html#sphx-glr-auto-examples-preprocessing-plot-function-transformer-py
     """
     colnames = df.columns
-    listTransforms = {'max': max, 'argmax':np.argmax, 'min': min, 'argmin':np.argmin, 'mean':np.mean, 'std': np.std, 'median': np.median}
+    listTransforms = {'max': max, 'argmax':np.argmax, 'min': min, 'argmin':np.argmin, 'mean':np.mean, 'std': np.std, 'median': np.median, 'last': lambda x:x[-1]}
     listToStats = lambda x: [listTransforms[trf](x) for trf in listTransforms]
     statsNames = list(listTransforms.keys())
 
