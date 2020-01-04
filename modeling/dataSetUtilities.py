@@ -13,7 +13,7 @@ def pivotSeries(s, start, end):
     return pd.concat([s.shift(i) for i in range(start, end, -1)], axis=1).apply(lambda x: list(x), axis=1)
 
 def createTrainingDataSet(ds, presentStart=1, pastStart=4, futureEnd=-5):
-    ## CAREFUL!! THIS FUNCTION IS RETURNING unthresholdedTarget, high risk of overfiting. 
+    ## CAREFUL!! THIS FUNCTION IS RETURNING unthresholdedTarget, high risk of overfiting (pipeline is dumping this column anyway). 
     assert (pastStart>=0 and futureEnd<0 and presentStart>=0), "check the signs of the specified times"
     df = pivotWindow(ds, pastStart, -1) #[4,3,2,1,0] # (looks at past and present)
     dpresent = pivotWindow(ds, presentStart, -1, columns=['Low', 'High']) # [1, 0] # hardcoded for now: two minutes
