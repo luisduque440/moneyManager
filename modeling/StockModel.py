@@ -9,7 +9,7 @@ from sklearn.linear_model import LogisticRegression
 
 
 
-class StockModel():
+class stockModel():
     """Wrapper of a single pipeline with its respective thresholds, train datasets and evaluators
     """
     def __init__(self, stockSymbol, startDay, endDay):
