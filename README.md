@@ -40,4 +40,25 @@ basicModeling:
 
 
 
+## Notes about the idea of a model blender:
+* What is an order? Focus on one type of order
+* What is an outcome? differentiate between real outcome and simulated outcome.
+* What is a blended model?
+- input: available cash, order, time until markets close (?), max_transaction limit
+- output: authorization/non-authorization to execute the order.
+
+* Type of order: buy one unit
+ Stock: MSFT
+ Start time: 1:00pm
+ Expiration time at 1:05pm. 
+ Initial buy at 11 USD 
+ Keep interval: [10, 15] (if goes below 10 or above 15: sell)
+ [if MSFT goes bellow]
+
+
+
+
+
+
+
 
