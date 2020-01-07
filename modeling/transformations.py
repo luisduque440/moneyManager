@@ -5,15 +5,13 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 
 class ColumnSelector(BaseEstimator, TransformerMixin):
-    """Transformation used to explicitly learn or select the columns from a data frame.
-    The columns could be explicitly selected or learnt from another data frame
+    """Used to explicitly select the columns in a pipeline
     """
     
-    def __init__(self, columns=None):
+    def __init__(self, columns):
         self.columns = columns
     
     def fit(self, X, y=None):
-        if self.columns==None: self.columns = list(X.columns)
         return self
         
     def transform(self, X):
@@ -21,25 +19,15 @@ class ColumnSelector(BaseEstimator, TransformerMixin):
         df = X[self.columns].copy()
         return df
     
-# ##### Notes
-# E.g. for a univariate time series 𝑦𝑖, you would use 𝑦𝑖 as response and e.g. the following features:
-# Lagged versions 𝑦𝑖−1, 𝑦𝑖−2, 𝑦𝑖−3 etc.
-# Differences of appropriate order, e.g. 𝑦𝑖−1−𝑦𝑖−2, 𝑦𝑖−1−𝑦𝑖−8 (if there is weekly seasonality expected and the observations occur daily) etc.
-# Integer or dummy coded periodic time info such as month in year, week day, hour of day, minute in hour etc.
-
-
-
 
 def featureEngineering(df):
-    """ better do this:
-    https://scikit-learn.org/stable/auto_examples/preprocessing/plot_function_transformer.html#sphx-glr-auto-examples-preprocessing-plot-function-transformer-py
+    """ Start documenting this
     """
     colnames = df.columns
     listTransforms = {'max': max, 'argmax':np.argmax, 'min': min, 'argmin':np.argmin, 'mean':np.mean, 'std': np.std, 'median': np.median, 'last': lambda x:x[-1]}
     listToStats = lambda x: [listTransforms[trf](x) for trf in listTransforms]
     statsNames = list(listTransforms.keys())
 
-    # the following line was commented to check if we are overfiting
     timeTransforms = {'hour': (lambda x: x.hour), 'tenminute': (lambda x: x.minute//10)}
     timeToStats = lambda x: [timeTransforms[trf](x) for trf in timeTransforms]
     timeFeatureNames = list(timeTransforms.keys())
@@ -58,8 +46,7 @@ def featureEngineering(df):
 
 
 def timeSeriesScaler(df):
-    """ better do this:
-    https://scikit-learn.org/stable/auto_examples/preprocessing/plot_function_transformer.html#sphx-glr-auto-examples-preprocessing-plot-function-transformer-py
+    """ Start documenting this
     """
     df['currentValue'] = df.Close.apply(lambda x: x[-1])
     df['currentVolume'] = df.Volume.apply(lambda x: x[-1])
@@ -126,13 +113,13 @@ class TransformationWrapper(BaseEstimator, TransformerMixin):
 
 	Example
 	    >> dg = pd.DataFrame({'A':[0.5, 0.6, 0.7]})
-	    >> NumericFeaturesScaler(scaler = MinMaxScaler()).fit(dg).transform(dg)
+	    >> NumericFeaturesScaler(transformation = MinMaxScaler()).fit(dg).transform(dg)
 	    0  0.0
 	    1  0.5
 	    2  1.0
 
 	Attributes:
-	    scaler: scaler class from scikit-learn, optional, default MinMaxScaler()
+	    transformation: a sklearn transformation, typically a scaler
 	"""
 	def __init__(self, transformation):
 		self.transformation = transformation
@@ -146,8 +133,6 @@ class TransformationWrapper(BaseEstimator, TransformerMixin):
 
 
 
-
-    
 class sampleTransformer(BaseEstimator, TransformerMixin):
     """sample way of building things
     """

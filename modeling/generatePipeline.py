@@ -10,6 +10,13 @@ from sklearn.linear_model import LogisticRegression
 
 
 def generatePipeline():
+    """ start documenting this 
+    To do:
+        1) classifier could be a parameter, columns to use could be parameters
+        2) Include differences as features too.
+        3) Bayes-encode the time features
+        4) How should the exogenous features feed this pipeline?
+    """
 	pipeline = Pipeline([
 	    ('selectcolumns', ColumnSelector(columns = ['Open', 'High', 'Low', 'Close', 'Volume'])), 
 	    ('scaletimeseries', FunctionTransformer(timeSeriesScaler)),
