@@ -1,55 +1,83 @@
 
-import os, time
 import pandas as pd
 from datetime import datetime, timedelta
 from .stockModel import stockModel
 
 
-
 class StockListTracker():
     """ This is the first strategy to deploy
     """
-    def __init__(self, tradingDay=None, stockList=None, tradingTimeZone="America/New_York"):
-        os.environ["TZ"] = tradingTimeZone
-        self.tradingTimeZone = tradingTimeZone
-        self.tradingDay = datetime.now().replace(hour=0, minute =0, second=0, microsecond=0) if tradingDay==None else tradingDay
-        self.stockList = self._getDowJonesSymbols() if stockList==None else stockList
+    def __init__(self):
+        """ DONE
+        """
+        self.tradingDay = datetime.now().replace(hour=0, minute =0, second=0, microsecond=0)
+        self.stockSymbols = self._getDowJonesSymbols()
         self.stockModelDictionary = getStockModelDictionary(self.stockList)
 
 
-    def _getDowJonesSymbols(self):
-        return ['GOOGL', 'IBM', 'UNIMPLEMENTED']
-
-
     def getStockModelDictionary(self, numTrainingDays=28):
-        """ Trains all the stockModels
+        """ DONE. Trains all the stockModels
         """
         startTrainTime = (self.tradingDay - timedelta(days=numTrainingDays))
         endTrainTime = self.tradingDay
         modelDictionary = {}
-        for symbol in stockSymbols:
+        for symbol in self.stockSymbols:
             modelDictionary[symbol] = stockModel(symbol, startTrainTime, endTrainTime).fullyTrain()
         return modelDictionary
 
-    def getLastTradeableMinute(self)
-        print("method getLastTradeableMinute() is not available yet")
-        return datetime(1970,1,1)
+    def getLastAvailableMinute(self):
+        """ UNFINISHED. Plataform dependent
+        """
+        return
 
 
     def getLatestOrderSuggestions(self):
-        """ returns a dictionary with the orders that our stockModels suggest
-
+        """ DONE. returns a dictionary with the orders that our stockModels suggest
         """
-        lastTradeableMinute = self.getLastTradeableMinute()
-        # iterates on all the models to produce a list/dictionary with orders (probably a list)
-        df = pd.DataFrame()
-        return df
+            return {stock: self.modelDictionary[stock].getLatestOrderSuggestions() for stock in self.stockList}
 
 
     def getExecutableOrders():
-        """ From the infor
+        """ Main strategy: puts together the information coming from all the models
+            We want to buy/sell an stock if:
+                (1) We have too little/too much of it compared to the proportions of Dow Jones.
+                (2) We have not trade that stock on a certain period of time.
+                (3) Our models suggest that we should buy it/ sell it.
         """
         orderSuggestions = self.getLatestOrderSuggestions()
-        ## ... filters 
+        dowJonesProportions = self.getDowJonesProportions()
+        portFolioProportions = self.getPorfolioProportions()
+        latestTransactionTimes = self.getLatestTransactionTimes()
+
+        # implement the actual strategy, report the times in which the orders must be executed.
+
         orders = {}
         return orders
+
+    def getDowJonesProportions(self):
+        """ Returns a dictionary of percentages (adds up to 1) of how money is allocated in the DowJones
+        """
+        dowJonesProportions={} 
+        return dowJonesProportions
+
+    def getPorfolioProportions(self):
+        """ Returns a dictionary of percentages (adds up to 1) of how money is allocated in our portfolio
+        """
+        dowJonesProportions={self} 
+        return dowJonesProportions
+
+    def getLatestTransactionTimes(self):
+        """ Returns a dictionary of percentages (adds up to 1) of how money is allocated in our portfolio
+        """
+        return 
+
+
+    def _getDowJonesSymbols(self):
+        """ Done
+        """
+        dowJonesSymbols =  [
+            "MMM", "AXP", "AAPL", "BA", "CAT", "CVX", "CSCO", "KO", "DIS", "DOW", "XOM", "GS", "HD", "IBM", "INTC", 
+            "JNJ", "JPM", "MCD", "MRK", "MSFT", "NKE", "PFE", "PG", "TRV", "UTX", "UNH", "VZ", "V", "WBA", "WMT"
+        ]
+        return dowJonesSymbols
+

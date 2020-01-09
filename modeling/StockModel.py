@@ -28,6 +28,9 @@ class stockModel():
         df = pd.DataFrame()
         return df
 
+    def getLatestOrderSuggestions(self):
+        return 
+
 
 
 def generatePipeline():

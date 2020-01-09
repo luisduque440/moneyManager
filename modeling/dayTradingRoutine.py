@@ -1,3 +1,7 @@
+import os, time
+from .stockListTracker import stockListTracker
+from datetime import datetime as dt
+os.environ["TZ"] = "America/New_York"
 
 
 def dayTradingRoutine():
@@ -5,10 +9,10 @@ def dayTradingRoutine():
     """
 
     strategy = stockListTracker()
-    lastTradedMinute = datetime.now().replace(hour=0, minute =0, second=0, microsecond=0)
+    lastTradedMinute = dt.now().replace(hour=0, minute =0, second=0, microsecond=0)
 
     while(not marketClosedToday()):
-        lastAvailableMinute = strategy.getLastTradeableMinute()
+        lastAvailableMinute = strategy.getLastTradeableMinute() # getLastMinuteDataIsAvailable()
         if lastAvailableMinute>lastTradedMinute:
             orders = strategy.getExecutableOrders()
             executeOrders(orders)
@@ -23,7 +27,7 @@ def dayTradingRoutine():
 def executeOrders(orders):
     """ Execute a dictionary with orders
     """
-    # must check if the orders are not 'too old'. If they are we want to throw them away.
+    # must check if the orders are not 'too old'. If they are we should throw them away.
     
     return 
 
@@ -32,28 +36,30 @@ def executeOrders(orders):
 def produceDailyReport():
     """ produces a detailed report of what happened during the day
     """
-    return "Daily Report"
+    return 
 
 
 def getCurrentMinute(timezone=None):
-    cMinute = datetime.now()
+    """
+    """
+    cMinute = dt.now()
     cMinute.replace(second=0, microsecond=0)
     return cMinute
 
 def getTodayCloseTime(timezone=None):
-    return datetime.now().replace(hour=16, minute =0, second=0, microsecond=0)
+    return dt.now().replace(hour=16, minute =0, second=0, microsecond=0)
 
 def getTodayOpenTime(timezone=None):
-    return datetime.now().replace(hour=9, minute =0, second=0, microsecond=0)
+    return dt.now().replace(hour=9, minute =0, second=0, microsecond=0)
 
 def marketIsOpen():
-    cTime = datetime.now()
+    cTime = dt.now()
     openTime = getTodayOpenTime()
     closeTime = getTodayCloseTime()
     return (cTime>=openTime and cTime<closeTime())
 
 def marketClosedToday():
-    cTime = datetime.now()
+    cTime = dt.now()
     closeTime = getTodayCloseTime()
     return cTime>=closeTime
 
