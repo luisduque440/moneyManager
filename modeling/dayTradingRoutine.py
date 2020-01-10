@@ -12,8 +12,8 @@ def dayTradingRoutine():
     lastTradedMinute = dt.now().replace(hour=0, minute =0, second=0, microsecond=0)
 
     while(not marketClosedToday()):
-        lastAvailableMinute = strategy.getLastTradeableMinute() # getLastMinuteDataIsAvailable()
-        if lastAvailableMinute>lastTradedMinute:
+        currentMinute = getCurrentMinute()
+        if currentMinute>lastTradedMinute and strategy.modelsCanRunAtCurrentMinute(currentMinute) 
             orders = strategy.getExecutableOrders()
             executeOrders(orders)
             lastTradedMinute = lastAvailableMinute
@@ -39,17 +39,17 @@ def produceDailyReport():
     return 
 
 
-def getCurrentMinute(timezone=None):
+def getCurrentMinute():
     """
     """
     cMinute = dt.now()
     cMinute.replace(second=0, microsecond=0)
     return cMinute
 
-def getTodayCloseTime(timezone=None):
+def getTodayCloseTime():
     return dt.now().replace(hour=16, minute =0, second=0, microsecond=0)
 
-def getTodayOpenTime(timezone=None):
+def getTodayOpenTime():
     return dt.now().replace(hour=9, minute =0, second=0, microsecond=0)
 
 def marketIsOpen():

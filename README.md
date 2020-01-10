@@ -1,4 +1,12 @@
-# moneyManager
+
+Key future idea:
+===================================================
+* Given that all we want to do at the end is operations of the type (sell/buy), We could, for instance, model stocks by pairs. In this scenario, a very natural target appears precisely
+When the value of one of the stocks increases more than the other: this would clearly
+Suggest a (buy/sell), and again, we can keep modeling this as a classification.
+
+* Modeling/predicting a target is not enough. Test asap if we can actually make money from the target we are predicting.
+
 
 Goals:
 ===================================================

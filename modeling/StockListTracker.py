@@ -25,7 +25,7 @@ class StockListTracker():
             modelDictionary[symbol] = stockModel(symbol, startTrainTime, endTrainTime).fullyTrain()
         return modelDictionary
 
-    def getLastAvailableMinute(self):
+    def modelsCanRunAtCurrentMinute(self, currentMinute):
         """ UNFINISHED. Plataform dependent
         """
         return
