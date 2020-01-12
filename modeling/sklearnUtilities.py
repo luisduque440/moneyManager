@@ -48,12 +48,16 @@ def featureEngineering(df):
 def timeSeriesScaler(df):
     """ Start documenting this
     """
-    df['currentValue'] = df.Close.apply(lambda x: x[-1])
-    df['currentVolume'] = df.Volume.apply(lambda x: x[-1])
-    df['Volume']=df.apply(lambda x: np.array(x['Volume'])/x.currentVolume, axis=1)
-    for col in ['Open', 'High', 'Low', 'Close']:
-        df[col]=df.apply(lambda x: np.array(x[col])/x.currentValue, axis=1)
-    return df.drop(columns = ['currentValue', 'currentVolume'])
+    #df['currentValue'] = df.Close.apply(lambda x: x[-1])
+    #df['currentVolume'] = df.Volume.apply(lambda x: x[-1])
+    #df['Volume']=df.apply(lambda x: np.array(x['Volume'])/x.currentVolume, axis=1)
+    #for col in ['Open', 'High', 'Low', 'Close']:
+    #    df[col]=df.apply(lambda x: np.array(x[col])/x.currentValue, axis=1)
+    #return df.drop(columns = ['currentValue', 'currentVolume'])
+    dg = pd.DataFrame(index=df.index)
+    for col in df.columns: 
+        dg[col]=df[col].apply(lambda x: list(np.array(x)/x[-1]))
+    return dg
 
 
 
