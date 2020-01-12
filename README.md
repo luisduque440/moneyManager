@@ -1,5 +1,5 @@
 
-January 10/2020: (Good improvement in target definition and finding minimal performance requirements for our models)
+January 10/2020: (improvement in target definition and finding minimal performance requirements for our models)
 ===================================================
 * Created a notebook with the goal of defining a target, results are very promising.
 * The main takeouts are the following, if we only trade two stocks (IBM, IOH) and we are able to guess every minute which of the stocks is going to 'perform better'
@@ -84,13 +84,3 @@ basicModeling:
  Initial buy at 11 USD 
  Keep interval: [10, 15] (if goes below 10 or above 15: sell)
  [if MSFT goes bellow]
-
-
-
-
-
-
-
-
-
-
