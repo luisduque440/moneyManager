@@ -63,7 +63,7 @@ def timeSeriesToFeatures(df, listToStatsDict = listToStatsDict):
     df.columns = featureNames
     return df
 
-def createTimeSeriesDiferences(df):
+def createTimeSeriesDiferences(df): # should we also add cumulative sums (??)
     """ Start documenting this
     """
     for col in df.columns:

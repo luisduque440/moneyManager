@@ -1,4 +1,20 @@
 
+January 13/2020:
+===================================================
+Goals:
+-------------
+* Move to python 3.5
+* Start reading/implementing things on quantopian: focus on data gathering: (method loadTimeSeries())
+* Have the pipeline and the current notion of target implemented
+* See how good is the precision recall curve we can get with Logistic regression and (maybe) random forests
+* If the precision and recall are 'reasonable' proceed to wrap the pipeline into an object StockModel that produces all the statistics we need.
+
+
+Achievements:
+-------------
+
+
+
 January 10/2020: (improvement in target definition and finding minimal performance requirements for our models)
 ===================================================
 * Created a notebook with the goal of defining a target, results are very promising.
