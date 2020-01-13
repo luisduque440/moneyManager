@@ -3,6 +3,18 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 
 
+timeToStatsDict = {
+    'hour': (lambda x: 'hour='+str(x.hour)), 
+    'minute': (lambda x: 'minute='+str(x.minute)), 
+    'hourminute': (lambda x: str(x.minute)+':'+str(x.hour)) 
+}
+
+
+listToStatsDict = {
+    'max': max, 'argmax':np.argmax, 'min': min, 'argmin':np.argmin, 
+    'mean':np.mean, 'std': np.std, 'median': np.median, 'last': lambda x:x[-1]
+}
+
 
 class ColumnSelector(BaseEstimator, TransformerMixin):
     """Used to explicitly select the columns in a pipeline
@@ -18,49 +30,55 @@ class ColumnSelector(BaseEstimator, TransformerMixin):
         for c in self.columns: assert c in list(X.columns), "the data frame is missing column %s" %(c)
         df = X[self.columns].copy()
         return df
-    
 
-def featureEngineering(df):
+
+
+def createTimeFeatures(df, timeToStatsDict=timeToStatsDict):
+    """ Creates minute of the day, 
+    """
+    timeToStats = lambda x: [timeToStatsDict[trf](x) for trf in timeToStatsDict]
+    timeFeatureNames = list(timeToStatsDict.keys())
+    dT = pd.DataFrame(index=df.index)
+    dT['datetime'] = df.index.map(timeToStats)
+    dT = dT.apply(lambda x: pd.Series(sum(x.values, [])), axis=1)
+    dT.columns = timeFeatureNames
+    df = df.merge(dT, how='left', left_index=True, right_index=True)
+    return df
+
+
+def timeSeriesToFeatures(df, listToStatsDict = listToStatsDict):
     """ Start documenting this
     """
-    colnames = df.columns
-    listTransforms = {'max': max, 'argmax':np.argmax, 'min': min, 'argmin':np.argmin, 'mean':np.mean, 'std': np.std, 'median': np.median, 'last': lambda x:x[-1]}
-    listToStats = lambda x: [listTransforms[trf](x) for trf in listTransforms]
-    statsNames = list(listTransforms.keys())
-
-    timeTransforms = {'hour': (lambda x: x.hour), 'tenminute': (lambda x: x.minute//10)}
-    timeToStats = lambda x: [timeTransforms[trf](x) for trf in timeTransforms]
-    timeFeatureNames = list(timeTransforms.keys())
-
-    for col in colnames: 
+    originalColnames = list(df.columns)
+    listToStats = lambda x: [listToStatsDict[trf](x) for trf in listToStatsDict]
+    for col in df.columns: 
         df[col] = df[col].apply(listToStats)
 
-    df['dateTime'] = df.index.map(timeToStats)
     df = df.apply(lambda x: pd.Series(sum(x.values, [])), axis=1)
 
     featureNames = []
-    for col in colnames:
+    statsNames = list(listToStatsDict.keys())
+    for col in originalColnames:
         featureNames = featureNames + [str(col)+'_'+str(stat) for stat in statsNames]
-    df.columns = (featureNames + timeFeatureNames)
+    df.columns = featureNames
     return df
+
+def createTimeSeriesDiferences(df):
+    """ Start documenting this
+    """
+    for col in df.columns:
+        df[col+'Difference']= df[col].apply(lambda x: [x[i]-x[i-1] for i in range(1,len(x))])
+    return df
+
 
 
 def timeSeriesScaler(df):
     """ Start documenting this
     """
-    #df['currentValue'] = df.Close.apply(lambda x: x[-1])
-    #df['currentVolume'] = df.Volume.apply(lambda x: x[-1])
-    #df['Volume']=df.apply(lambda x: np.array(x['Volume'])/x.currentVolume, axis=1)
-    #for col in ['Open', 'High', 'Low', 'Close']:
-    #    df[col]=df.apply(lambda x: np.array(x[col])/x.currentValue, axis=1)
-    #return df.drop(columns = ['currentValue', 'currentVolume'])
     dg = pd.DataFrame(index=df.index)
     for col in df.columns: 
         dg[col]=df[col].apply(lambda x: list(np.array(x)/x[-1]))
     return dg
-
-
-
 
 
 class BayesianCategoricalEncoder(TransformerMixin):  
@@ -83,33 +101,24 @@ class BayesianCategoricalEncoder(TransformerMixin):
         BayesianCategoricalEncoder is a bad name for this class. Apparently this type of encoders has a name
         potential improvement: add an option that creates another column with the 'support' of the quotient.
     """
-
     def __init__(self, colsToEncode=None):
         self.colsToEncode = colsToEncode
 
     def fit(self, X, y):
         df = X.select_dtypes(include='object').copy()
-
-        if self.colsToEncode ==None:
-            self.categorical_columns = list(df.columns)
-        else:
-            self.categorical_columns = self.colsToEncode
-
-        self.level_dictionary={}
+        self.catCols = list(df.columns) if self.colsToEncode==None else self.colsToEncode
+        self.levelDictionary={}
         df['target']=y
-        for col in self.categorical_columns:
+        for col in self.catCols:
             importance = df.groupby(col)['target'].agg([np.sum, np.size])
-            self.level_dictionary[col] = 1.0*importance['sum']/(importance['size']) 
+            self.levelDictionary[col] = 1.0*importance['sum']/(importance['size']) 
         return self
     
     def transform(self, X):
-        df=pd.DataFrame(index=X.index)
-        dictionary = self.level_dictionary
-        for col in self.categorical_columns:
-            df[col] = X[col].apply(lambda x: dictionary[col][x] if x in dictionary[col].index else None)
-        return df
-
-
+        dictionary = self.levelDictionary
+        for col in self.catCols:
+            X[col] = X[col].apply(lambda x: dictionary[col][x] if x in dictionary[col].index else None)
+        return X
 
 
 class TransformationWrapper(BaseEstimator, TransformerMixin):
@@ -134,7 +143,6 @@ class TransformationWrapper(BaseEstimator, TransformerMixin):
 
 	def transform(self, X):
 		return pd.DataFrame(self.transformation.transform(X), columns = X.columns, index=X.index)
-
 
 
 class sampleTransformer(BaseEstimator, TransformerMixin):

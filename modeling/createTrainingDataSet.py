@@ -1,6 +1,15 @@
 import pandas as pd
 import numpy as np
 
+
+def createTrainingDataSet(stock1, stock2, startDate, endDate, pastStart=4, futureEnd=-5):
+    ds1 = getTimeSeries(stock1, startDate, endDate)
+    ds2 = getTimeSeries(stock1, startDate, endDate)
+    df1 = pivotWindow(ds1, pastStart, -1) 
+    df2 = pivotWindow(ds2, pastStart, -1) 
+
+
+
 def createTrainingDataSet(ds, presentStart=1, pastStart=4, futureEnd=-5):
     """ start documenting this 
         To do: A more realistic target: the difference between next minutes price and the price in 20 minutes.

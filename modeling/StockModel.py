@@ -1,8 +1,11 @@
 from sklearn.pipeline import Pipeline
 from modeling.sklearnUtilities import ColumnSelector
 from modeling.sklearnUtilities import timeSeriesScaler
-from modeling.sklearnUtilities import featureEngineering
+from modeling.sklearnUtilities import timeSeriesToFeatures 
+from modeling.sklearnUtilities import createTimeFeatures 
 from modeling.sklearnUtilities import TransformationWrapper
+from modeling.sklearnUtilities import BayesianCategoricalEncoder
+from modeling.sklearnUtilities import createTimeSeriesDiferences
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LogisticRegression
@@ -45,10 +48,12 @@ def generatePipeline():
     """
     pipeline = Pipeline([
         ('selectcolumns', ColumnSelector(columns = ['Open', 'High', 'Low', 'Close', 'Volume'])), 
-        ('scaletimeseries', FunctionTransformer(timeSeriesScaler)),
-        ('featurengineering', FunctionTransformer(featureEngineering)),
-        # more feature engineering: bayesianEncoder for time, pca, log transformations, blah blah.
-        #('scaler', TransformationWrapper(MinMaxScaler())), ## the columns are lost :( put my own.
-        #('classifier', LogisticRegression(penalty='none', solver='sag', max_iter=1000)) # consider : LogisticRegressionCV
+        #('scaletimeseries', FunctionTransformer(timeSeriesScaler)),
+        ('createdifferences', FunctionTransformer(createTimeSeriesDiferences)), 
+        ('timeSeriesToFeatures', FunctionTransformer(timeSeriesToFeatures)), 
+        ('createtimefeatures', FunctionTransformer(createTimeFeatures)),
+        ('bayesianencoder', BayesianCategoricalEncoder()),
+        ('scaler', TransformationWrapper(MinMaxScaler())),
+        ('classifier', LogisticRegression(penalty='none', solver='sag', max_iter=1000))
     ])
     return pipeline
