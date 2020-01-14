@@ -2,20 +2,20 @@ import pandas as pd
 import numpy as np
 from sys import platform
 
-def loadTimeSeries(stock, startDate, endDate):
+def loadTimeSeries(stock, startDay, endDay):
     """ This function depends on the platform!!!
     """
     if platform=='darwin':
         names = ['Date', 'Time', 'Open', 'High', 'Low', 'Close', 'Volume']
         filename = stock+'_adjusted.txt'
-        df = pd.read_csv('data/sampleKibotData/minuteIntraday/'+filename, header=None, names=names)
+        df = pd.read_csv('data/sampleKibotData/minuteIntraday_modified/'+filename, header=None, names=names)
         df['DateTime']= pd.to_datetime((df.Date+' '+df.Time), infer_datetime_format=True) 
         df = df.drop(columns=['Date', 'Time'])
         df = df.set_index('DateTime')
     else:
         # https://www.quantopian.com/posts/minute-bar-data-in-research
         print('not implemented yet')
-    return df[['Open', 'High', 'Low', 'Close', 'Volume']] # this could change
+    return df[['Open', 'High', 'Low', 'Close', 'Volume']] # (!!!!)this could change
 
 
 def createTrainingDataSet(stock1, stock2, startDate, endDate, pastStart=4, futureEnd=-2):

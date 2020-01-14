@@ -6,7 +6,7 @@ from modeling.sklearnUtilities import createTimeFeatures
 from modeling.sklearnUtilities import TransformationWrapper
 from modeling.sklearnUtilities import BayesianCategoricalEncoder
 from modeling.sklearnUtilities import createTimeSeriesDiferences
-from sklearn.preprocessing import FunctionTransformer
+from modeling.sklearnUtilities import FunctionTransformer
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.linear_model import LogisticRegression
 

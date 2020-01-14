@@ -145,6 +145,22 @@ class TransformationWrapper(BaseEstimator, TransformerMixin):
 		return pd.DataFrame(self.transformation.transform(X), columns = X.columns, index=X.index)
 
 
+class FunctionTransformer(BaseEstimator, TransformerMixin):
+    """sample way of building things
+    """
+    def __init__(self, transformation):
+        self.transformation=transformation
+        pass
+    
+    def fit(self, X, y=None):
+        return self
+        
+    def transform(self, X):
+        df=X.copy()
+        dg = transformation(df)
+        return dg
+
+
 class sampleTransformer(BaseEstimator, TransformerMixin):
     """sample way of building things
     """

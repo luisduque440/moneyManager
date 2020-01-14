@@ -1,18 +1,28 @@
 
 January 13/2020:
 ===================================================
-Goals:
+Notes:
 -------------
 * Move to python 3.5
+* Careful! Our target is wrong, we need to compute the quotient-time series (not difference ... that is what matters.)
 * Start reading/implementing things on quantopian: focus on data gathering: (method loadTimeSeries())
 * Have the pipeline and the current notion of target implemented
 * See how good is the precision recall curve we can get with Logistic regression and (maybe) random forests
 * If the precision and recall are 'reasonable' proceed to wrap the pipeline into an object StockModel that produces all the statistics we need.
 
 
-Achievements:
+Note from Dan Whitnable (quantopian) (what is ziplane?)
 -------------
+Quantopian does not provide support for installing or running local installations of zipline. We only support the online Quantopian platform. Perhaps take a look at this post https://www.quantopian.com/posts/guide-for-porting-your-algorithms-to-a-local-zipline-research-environment which may offer some help. You are also welcome to post in the forums to request help from the community.
 
+Note from Juraij (former DRW)
+---------------
+Question: hey, do you have any resource that you recommend to read about strategies used nowadays?
+Unfortunately, I don't know the literature on this well. At my company we weren't really reading books on this topic. I guess the best advice is to come up with some "signal" (some value that you believe should be predictive of something), and then look how your target depends on this signal, and then try to improve it. In the end, if you have a couple of (at least somewhat independent) signals, you combine them in some way to get a final predictor (e.g. linear regression, logistic regression, boosted trees (which have become quite popular, from what I heard)). Typical themes of signals would be: movement of your stock relative to movement of correlated stocks, book dynamics, price momentum, ... However, I don't have much experience with time horizons longer than 1-2 minutes so I am not sure how useful I could be.
+
+and those signals typically come from the time series/tick data itself or is it a huge chunk of external data
+
+Question: and those signals typically come from the time series/tick data itself or is it a huge chunk of external data?
 
 
 January 10/2020: (improvement in target definition and finding minimal performance requirements for our models)
