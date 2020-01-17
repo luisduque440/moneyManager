@@ -20,16 +20,16 @@ class ColumnSelector(BaseEstimator, TransformerMixin):
     """Used to explicitly select the columns in a pipeline
     """
     
-    def __init__(self, columns):
+    def __init__(self, columns=None):
         self.columns = columns
     
     def fit(self, X, y=None):
+        self.columns=X.columns if self.columns==None else self.columns
         return self
         
     def transform(self, X):
         for c in self.columns: assert c in list(X.columns), "the data frame is missing column %s" %(c)
-        df = X[self.columns].copy()
-        return df
+        return X[self.columns]
 
 
 
@@ -146,7 +146,7 @@ class TransformationWrapper(BaseEstimator, TransformerMixin):
 
 
 class FunctionTransformer(BaseEstimator, TransformerMixin):
-    """sample way of building things
+    """ This is already common on some versions of sklearn
     """
     def __init__(self, transformation):
         self.transformation=transformation
@@ -157,7 +157,7 @@ class FunctionTransformer(BaseEstimator, TransformerMixin):
         
     def transform(self, X):
         df=X.copy()
-        dg = transformation(df)
+        dg = self.transformation(df)
         return dg
 
 

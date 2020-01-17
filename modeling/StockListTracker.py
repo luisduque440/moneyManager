@@ -73,11 +73,11 @@ class StockListTracker():
 
 
     def _getDowJonesSymbols(self):
-        """ Done
+        """ Done, note: IOH is not part of Dow, but I already have some familiarity with the pair (IBM, IOH)
         """
         dowJonesSymbols =  [
             "MMM", "AXP", "AAPL", "BA", "CAT", "CVX", "CSCO", "KO", "DIS", "DOW", "XOM", "GS", "HD", "IBM", "INTC", 
-            "JNJ", "JPM", "MCD", "MRK", "MSFT", "NKE", "PFE", "PG", "TRV", "UTX", "UNH", "VZ", "V", "WBA", "WMT"
+            "JNJ", "JPM", "MCD", "MRK", "MSFT", "NKE", "PFE", "PG", "TRV", "UTX", "UNH", "VZ", "V", "WBA", "WMT", "IOH"
         ]
         return dowJonesSymbols
 

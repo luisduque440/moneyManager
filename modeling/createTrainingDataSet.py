@@ -1,56 +1,53 @@
 import pandas as pd
 import numpy as np
+from datetime import datetime
 from sys import platform
 
 def loadTimeSeries(stock, startDay, endDay):
-    """ This function depends on the platform!!!
-    """
-    if platform=='darwin':
-        names = ['Date', 'Time', 'Open', 'High', 'Low', 'Close', 'Volume']
-        filename = stock+'_adjusted.txt'
-        df = pd.read_csv('data/sampleKibotData/minuteIntraday_modified/'+filename, header=None, names=names)
-        df['DateTime']= pd.to_datetime((df.Date+' '+df.Time), infer_datetime_format=True) 
-        df = df.drop(columns=['Date', 'Time'])
-        df = df.set_index('DateTime')
-    else:
-        # https://www.quantopian.com/posts/minute-bar-data-in-research
-        print('not implemented yet')
-    return df[['Open', 'High', 'Low', 'Close', 'Volume']] # (!!!!)this could change
+	""" 
+	"""
+	filename = stock+'.csv'
+	df = pd.read_csv('data/quantopian/minuteIntraday/'+filename).drop(columns=['symbol'])
+	df['date']= pd.to_datetime(df.date, infer_datetime_format=True) 
+	df = df[(df.date>=startDay) & (df.date<endDay)].copy()
+	df = df.set_index('date')
+	return df
 
 
-def createTrainingDataSet(stock1, stock2, startDate, endDate, pastStart=4, futureEnd=-2):
+def createTrainingDataSet(stock1, stock2, startDay, endDay, pastStart=4):
     """ Start documenting now.
         This requires more defensive code: look for instance at the old implementation of this function.
     """
-    ds1 = loadTimeSeries(stock1, startDate, endDate)
-    df1 = pivotWindow(ds1, pastStart, -1) 
-    s = ds1[['Open','High','Low','Close']].apply(np.mean, axis=1)
-    df1['increase'] = (s.shift(-futureEnd)-s.shift(-1))
+    ds1 = loadTimeSeries(stock1, startDay, endDay)
+    s = ds1.drop(columns='volume').apply(np.mean, axis=1)
+    ds1['FutureIncrease'] = (s.pct_change().shift(-2)+1)
 
-    ds2 = loadTimeSeries(stock2, startDate, endDate)
-    df2 = pivotWindow(ds2, pastStart, -1) 
-    s = ds2[['Open','High','Low','Close']].apply(np.mean, axis=1)
-    df2['increase'] = (s.shift(-futureEnd)-s.shift(-1))
+    ds2 = loadTimeSeries(stock2, startDay, endDay)
+    s = ds2.drop(columns='volume').apply(np.mean, axis=1)
+    ds2['FutureIncrease'] = (s.pct_change().shift(-2)+1)
 
-    df1.columns = [stock1+col for col in df1.columns]
-    df2.columns = [stock2+col for col in df2.columns]
-    dg = df1.merge(df2, how='inner', left_index=True, right_index=True)
-    dg['target']= dg[stock1+'increase'] > dg[stock2+'increase']
-    dg = dg.drop(columns=[stock1+'increase', stock2+'increase'])
-    return dg
-    
+    ds1.columns = ['stock1'+col for col in ds1.columns]
+    ds2.columns = ['stock2'+col for col in ds2.columns]
+    dg = ds1.merge(ds2, how='inner', left_index=True, right_index=True)
+    dg['target']= dg.stock1FutureIncrease > dg.stock2FutureIncrease 
+    dg = dg.drop(columns=['stock1FutureIncrease', 'stock2FutureIncrease'])
+
+    columnsToPivot = list(dg.columns)
+    columnsToPivot.remove('target')
+    df = pivotWindow(dg, pastStart, -1, columnsToPivot)
+    return df
 
 
-
-def pivotWindow(ds, start, end, columns = ['Open', 'High', 'Low', 'Close', 'Volume']):
-    """ start documenting this 
+def pivotWindow(ds, start, end, columnsToPivot):
+    """ we could add defensive code here, but wont for now 
     """
-    ds['DateTime']=list(ds.index)
-    pivotedCols = [pivotSeries(ds['DateTime'], start, end) ]+[pivotSeries(ds[col], start, end) for col in columns]
-    dg = pd.concat(pivotedCols, axis=1)
-    dg.columns = ['DateTime'] + columns
-    dg['validRow'] = (ds.DateTime.shift(end+1)-ds.DateTime.shift(start)).apply(lambda x: (start-end-1)==x.seconds/60)
+    columnsNotToPivot = [col for col in ds.columns if col not in columnsToPivot]
+    pivotedCols = [pivotSeries(ds[col], start, end) for col in columnsToPivot]
+    notPivotedCols = [ds[col] for col in columnsNotToPivot]
+    dg = pd.concat(pivotedCols + notPivotedCols, axis=1)
+    dg.columns = columnsToPivot + columnsNotToPivot
     return dg
+
 
 def pivotSeries(s, start, end): 
     """ start documenting this 

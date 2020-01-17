@@ -8,6 +8,7 @@ from modeling.sklearnUtilities import BayesianCategoricalEncoder
 from modeling.sklearnUtilities import createTimeSeriesDiferences
 from modeling.sklearnUtilities import FunctionTransformer
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 
 
@@ -47,13 +48,14 @@ def generatePipeline():
         4) How should the exogenous features feed this pipeline?
     """
     pipeline = Pipeline([
-        ('selectcolumns', ColumnSelector(columns = ['Open', 'High', 'Low', 'Close', 'Volume'])), 
+        ('selectcolumns', ColumnSelector()), 
         #('scaletimeseries', FunctionTransformer(timeSeriesScaler)),
         ('createdifferences', FunctionTransformer(createTimeSeriesDiferences)), 
         ('timeSeriesToFeatures', FunctionTransformer(timeSeriesToFeatures)), 
         ('createtimefeatures', FunctionTransformer(createTimeFeatures)),
         ('bayesianencoder', BayesianCategoricalEncoder()),
         ('scaler', TransformationWrapper(MinMaxScaler())),
-        ('classifier', LogisticRegression(penalty='none', solver='sag', max_iter=1000))
+        ('fillemptyvalues', TransformationWrapper(SimpleImputer(strategy='median')))
+        #('classifier', LogisticRegression(penalty='none', solver='sag', max_iter=1000))
     ])
     return pipeline

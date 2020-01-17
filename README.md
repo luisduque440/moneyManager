@@ -1,3 +1,10 @@
+January 15:
+===================================================
+* The notebook used to define the target is quite cool, still we need to add to start counting the number of transactions we are doing
+* Also in the same notebook: our strategy requires to hold a position until there is a better signal, we need to include this in the simulations.
+* Today: focus on creating the target ! a final one!
+
+
 
 January 13/2020:
 ===================================================
@@ -23,7 +30,9 @@ Unfortunately, I don't know the literature on this well. At my company we weren'
 and those signals typically come from the time series/tick data itself or is it a huge chunk of external data
 
 Question: and those signals typically come from the time series/tick data itself or is it a huge chunk of external data?
-
+A "signal" is whatever you come up with that has some (hopefully not spurious) correlation with your target (typically some price movement). You could create it just from time series of prices, or from any other data. In our group, the data we were using was tick data, meaning we had access to the whole state of the marketplace and all the "atomic" changes that are happening through a trading day. From that you can extract various signals that could be based on current state of the book, recent price changes, ...
+If you want to predict on long time scales (like several months), then fundamentals (net income, debt level, sales growth, ...) can be very important. Long time scales are tricky, however, since you have much smaller number of (uncorrelated) data points. 
+I also heard options positioning can be informative at times.
 
 January 10/2020: (improvement in target definition and finding minimal performance requirements for our models)
 ===================================================
