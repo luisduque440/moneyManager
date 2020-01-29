@@ -1,18 +1,30 @@
 import pandas as pd
 import numpy as np
+from scipy.stats import kurtosis
+from scipy.stats import skew
 from sklearn.base import BaseEstimator, TransformerMixin
+import math
+
 
 
 timeToStatsDict = {
-    'hour': (lambda x: 'hour='+str(x.hour)), 
-    'minute': (lambda x: 'minute='+str(x.minute)), 
-    'hourminute': (lambda x: str(x.minute)+':'+str(x.hour)) 
+    'hour': (lambda x: x.hour), 
+    'minute': (lambda x: x.minute), 
+    'hourminute': (lambda x: x.hour*100+x.minute) 
 }
+
+numpos = lambda x: len([v for v in x if v>0])
+posvar = lambda x: np.var([v for v in x if v>0])
+numnan = lambda x: len([v for v in x if math.isnan(v)])
+last =   lambda x: x[-1]
+first=   lambda x: x[0]
 
 
 listToStatsDict = {
-    'max': max, 'argmax':np.argmax, 'min': min, 'argmin':np.argmin, 
-    'mean':np.mean, 'std': np.std, 'median': np.median, 'last': lambda x:x[-1]
+    'max': max, 'argmax':np.argmax, 'min': min, 'argmin':np.argmin, 'mean':np.mean, 
+    'std': np.std, 'var': np.var, 'median': np.median, 'kurtosis': kurtosis, 'skew':skew, 
+    'numpos': numpos, 'posvar': posvar, 'numnan': numnan,
+    'last': last, 'first': first
 }
 
 
@@ -30,7 +42,6 @@ class ColumnSelector(BaseEstimator, TransformerMixin):
     def transform(self, X):
         for c in self.columns: assert c in list(X.columns), "the data frame is missing column %s" %(c)
         return X[self.columns]
-
 
 
 def createTimeFeatures(df, timeToStatsDict=timeToStatsDict):
@@ -79,6 +90,14 @@ def timeSeriesScaler(df):
     for col in df.columns: 
         dg[col]=df[col].apply(lambda x: list(np.array(x)/x[-1]))
     return dg
+
+
+def bayesianTransformer(df, levelDictionary):
+    """ Start documenting this
+    """
+    for col in levelDictionary:
+        df[col] = df[col].apply(lambda x: levelDictionary[col][x] if x in levelDictionary[col].index else None)
+    return df
 
 
 class BayesianCategoricalEncoder(TransformerMixin):  
@@ -146,18 +165,20 @@ class TransformationWrapper(BaseEstimator, TransformerMixin):
 
 
 class FunctionTransformer(BaseEstimator, TransformerMixin):
-    """ This is already common on some versions of sklearn
+    """ This is already common on some versions of sklearn, the way we deal with parameters should be improved
     """
-    def __init__(self, transformation):
+    def __init__(self, transformation, parameters = None):
         self.transformation=transformation
+        self.parameters = parameters
         pass
     
     def fit(self, X, y=None):
         return self
-        
+
     def transform(self, X):
         df=X.copy()
-        dg = self.transformation(df)
+        parameters=self.parameters
+        dg = self.transformation(df) if parameters==None else self.transformation(df, parameters)
         return dg
 
 

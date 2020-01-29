@@ -5,6 +5,7 @@ from modeling.sklearnUtilities import timeSeriesToFeatures
 from modeling.sklearnUtilities import createTimeFeatures 
 from modeling.sklearnUtilities import TransformationWrapper
 from modeling.sklearnUtilities import BayesianCategoricalEncoder
+from modeling.sklearnUtilities import bayesianTransformer
 from modeling.sklearnUtilities import createTimeSeriesDiferences
 from modeling.sklearnUtilities import FunctionTransformer
 from sklearn.preprocessing import MinMaxScaler
@@ -38,7 +39,7 @@ class stockModel():
 
 
 
-def generatePipeline():
+def generatePipeline(levelDictionary=None):
     """ start documenting this 
     To do:
         0) The name of this should change: generateTimeSeriesPipeline()
@@ -49,13 +50,18 @@ def generatePipeline():
     """
     pipeline = Pipeline([
         ('selectcolumns', ColumnSelector()), 
-        #('scaletimeseries', FunctionTransformer(timeSeriesScaler)),
         ('createdifferences', FunctionTransformer(createTimeSeriesDiferences)), 
-        ('timeSeriesToFeatures', FunctionTransformer(timeSeriesToFeatures)), 
+        ('timeSeriesToFeatures', FunctionTransformer(timeSeriesToFeatures)),
         ('createtimefeatures', FunctionTransformer(createTimeFeatures)),
-        ('bayesianencoder', BayesianCategoricalEncoder()),
-        ('scaler', TransformationWrapper(MinMaxScaler())),
-        ('fillemptyvalues', TransformationWrapper(SimpleImputer(strategy='median')))
+        ('fillemptyvalues', TransformationWrapper(SimpleImputer(strategy='median'))),
+        ('scaler', TransformationWrapper(MinMaxScaler()))
         #('classifier', LogisticRegression(penalty='none', solver='sag', max_iter=1000))
     ])
     return pipeline
+
+
+#('scaletimeseries', FunctionTransformer(timeSeriesScaler)),
+
+#('bayesianencoder', BayesianCategoricalEncoder()),
+#('bayesiantransformer', FunctionTransformer(bayesianTransformer, levelDictionary)),
+

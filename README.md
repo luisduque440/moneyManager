@@ -1,3 +1,16 @@
+January 28:
+==================================================
+Be extremely careful on the way BayesianEncoder leaks data
+This looks legit: https://www.quora.com/I-would-like-to-learn-algo-trading-Where-should-I-start/answer/Laurent-Bernut?share=82f67f20&srid=h5Vfp
+
+
+January 23:
+===================================================
+* PLAN FOR THE NEAR FUTURE: Consider the target: True if there is a positive increase of a stock in the next minute and False otherwise. This target is apparently 'easy' to predict (EDA_IBM_1min suggests so), but we still have not quantified how good have to be our models for this to work, so I must modify the notebook defining_a_target.ipynb.
+* BEFORE: We were defining the following target: True if one stock increases more than the other one in the next minute. The notebook definining_a_target.ipynb quantifies (around 70% precision and 20% recall) how good have to be our models to make this strategy work, the pipeline we had was very far away from achieving this goal.
+
+
+
 January 15:
 ===================================================
 * The notebook used to define the target is quite cool, still we need to add to start counting the number of transactions we are doing
