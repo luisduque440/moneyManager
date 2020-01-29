@@ -1,3 +1,8 @@
+January 30:
+==================================================
+Focus on preparing a nice explanation of what is happening and show it to Jake
+
+
 January 28:
 ==================================================
 Be extremely careful on the way BayesianEncoder leaks data
