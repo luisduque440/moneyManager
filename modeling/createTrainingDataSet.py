@@ -1,20 +1,6 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from sys import platform
-
-def loadTimeSeries(stock, startDay, endDay):
-    """ 
-    """
-    filename = stock+'.csv'
-    df = pd.read_csv('data/quantopian/minuteIntraday/'+filename).drop(columns=['symbol'])
-    df['date']= pd.to_datetime(df.date, infer_datetime_format=True) 
-    df = df[(df.date>=startDay) & (df.date<endDay)].copy()
-    df = df.set_index('date')
-    df.columns = ['open','high','low','close','volume']
-    df['consolidated']=df.drop(columns='volume').mean(axis=1)
-    return df
-
 
 def createTrainingDataSet(stock1, startDay, endDay, pastStart=20):
     """ Start documenting now.
