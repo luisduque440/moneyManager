@@ -1,10 +1,14 @@
 import pandas as pd
 from os import listdir
 from os.path import isfile, join
+from datetime import datetime
 
 dataPath = '/Users/lduque/Desktop/myProjects/moneyManager/data/quantopian/minuteIntraday/'
+startDay = datetime(2019,1,1)
+endDay = datetime(2020,1,1)
 
-def loadTimeSeries(stock, startDay, endDay):
+
+def loadTimeSeries(stock, startDay=startDay, endDay=endDay):
     """ 
     """
     filename = stock+'.csv'
@@ -16,12 +20,14 @@ def loadTimeSeries(stock, startDay, endDay):
     df['consolidated']=df.drop(columns='volume').mean(axis=1)
     return df
 
-def loadAvailablePriceTimeSeries(startDay, endDay):
-    availableStocks = getListOfAvailableStocks()
-    return {S: loadTimeSeries(S, startDay, endDay).consolidated for S in availableStocks}
+def loadPriceTimeSeries(startDay=startDay, endDay=endDay, stockList=None):
+    stockList = getListOfAvailableStocks() if stockList==None else stockList
+    fullTimeSeries = {S: loadTimeSeries(S, startDay, endDay).consolidated for S in stockList}
+    return fullTimeSeries
 
-def loadAvailableIncreaseTimeSeries(startDay, endDay):
-    availablePrices = loadAvailablePriceTimeSeries(startDay, endDay)
+def loadIncreaseTimeSeries(startDay=startDay, endDay=endDay, stockList=None):
+    stockList = getListOfAvailableStocks() if stockList==None else stockList
+    availablePrices = loadPriceTimeSeries(startDay, endDay, stockList)
     return {S: (1+availablePrices[S].pct_change()).fillna(1) for S in availablePrices}
 
 def getListOfAvailableStocks():
