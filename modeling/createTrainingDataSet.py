@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
+from .loadTimeSeries import loadTimeSeries
 
 def createTrainingDataSet(stock1, startDay, endDay, pastStart=20):
     """ Start documenting now.
