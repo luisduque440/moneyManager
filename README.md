@@ -1,3 +1,8 @@
+February 1:
+=================================================
+Wrote some slides https://docs.google.com/presentation/d/1sw5fpotCFi39HGfgBcPg7wA-OpySorSGG-5_s5gVA8c/edit#slide=id.p
+
+
 January 30:
 ==================================================
 Focus on preparing a nice explanation of what is happening and show it to Jake

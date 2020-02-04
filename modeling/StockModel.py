@@ -59,6 +59,7 @@ def generatePipeline(levelDictionary=None):
     ])
     return pipeline
 
+# try pca asap !!
 
 #('scaletimeseries', FunctionTransformer(timeSeriesScaler)),
 
