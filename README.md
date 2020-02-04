@@ -1,3 +1,17 @@
+February 4:
+=================================================
+Met with Jake, took the following notes
+* Indicator: average trade range, use this to create a target 1= went up a lot, 0 'did not move much', -1 'went down a lot'
+* Add cash
+* change targets
+* Add features: vix (volatility index), futures data (maybe not?), nasdaq, alltech, etf technology xlk (?)
+  $tick: number of stocks that go up and up, tic (from polygon), volume*price, other indicator: momentum indicator, far away from bollingr bars, adx: how trending that time series is (this might be the most informative one, adx for each particular stock, a number computed from the time series), number of times above the average, talib: technical analysis library python: produces tons of indicators, overbuy oversell indicator.
+* trend followers by mickael cobel : about trend following algorithms.
+* moving average: long term MA, medium term MA, short term MA. Is the median above each of the averages
+* Trending type of features.
+* adx above/below 30.
+
+
 February 1:
 =================================================
 Wrote some slides https://docs.google.com/presentation/d/1sw5fpotCFi39HGfgBcPg7wA-OpySorSGG-5_s5gVA8c/edit#slide=id.p
