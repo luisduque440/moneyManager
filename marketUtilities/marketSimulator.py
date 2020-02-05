@@ -18,13 +18,3 @@ def marketSimulator(positionTS, initialAmount=1.0):
 	positionIncreases.values[0]=initialAmount
 	positionValue = positionIncreases.cumprod()
 	return positionValue
-
-
-
-# Use the following in test_marketSimulator.py
-#from .loadTimeSeries import loadTimeSeries
-#def testCaseForModelSimulator():
-	#S=loadTimeSeries('GS', datetime(2019,1,1), datetime(2020,1,1)).consolidated
-	#positionTS=pd.Series(['GS']*len(S),index=S.index)
-	#win = modelSimulator(positionTS, initialAmount=S.values[0])
-	# S and win must be *almost* the same
