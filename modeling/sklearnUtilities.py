@@ -195,3 +195,9 @@ class sampleTransformer(BaseEstimator, TransformerMixin):
         df=X.copy()
         return df
    
+
+
+# going to need some sort of refined way of doing crossvalidation
+# https://hub.packtpub.com/cross-validation-strategies-for-time-series-forecasting-tutorial/
+# blocking Time Series?
+
