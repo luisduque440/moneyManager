@@ -11,6 +11,7 @@ from modeling.sklearnUtilities import FunctionTransformer
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
+from sklearn.decomposition import PCA
 
 
 
@@ -54,10 +55,15 @@ def generatePipeline(levelDictionary=None):
         ('timeSeriesToFeatures', FunctionTransformer(timeSeriesToFeatures)),
         ('createtimefeatures', FunctionTransformer(createTimeFeatures)),
         ('fillemptyvalues', TransformationWrapper(SimpleImputer(strategy='median'))),
-        ('scaler', TransformationWrapper(MinMaxScaler()))
+        ('scaler', TransformationWrapper(MinMaxScaler())),
+        ('pca', PCA(n_components=30))
         #('classifier', LogisticRegression(penalty='none', solver='sag', max_iter=1000))
     ])
     return pipeline
+
+
+#X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
+#pca = PCA(n_components=2)
 
 # try pca asap !!
 
