@@ -1,3 +1,21 @@
+February 6:
+================================================
+Had a conversation with Spencer:
+* He suggested to keep in mind Shape Ratios: 1 is OK, 5 is good, 7 is excellent
+* He does not like Quantopian/Quantconnect for tests, he says they get to see what you are doing
+* He will send an article and a book about algorithmic trading
+
+
+Febryary 5:
+================================================
+* How about training the models like this:
+- train-eval-test with one fold each and in chrono order
+- Check on real time what percentage of hits are we getting: use Bayes.
+- Do some feature engineering, pca, regularization for some time AND pick as little features as possible AND only one classification algo (naive bayes)
+
+* About quantconnect from reddit: (https://www.reddit.com/r/algotrading/comments/afw27d/anyone_using_quantconnect_for_live_trading)
+I run a fund that does all of it's execution via quantconnect and has done so for about a year and half. We find the system to be very stable having had maybe 3-4 days with minor issues during this time. It's a great way to get to market faster than writing the entire backend and live system yourself. When you deploy the live machines are colocated so you will do as well latency wise as paying for other services to do this with an IB setup. As rrobinson2000 points out Jared and his team are very responsive in the case of a live problem and the slack community is quite helpful if you run into issues with programming and the platform in general. Our trade isn't terribly latency sensitive but anything you can reasonably do with IB i would expect you to be able to do with QC. The main limitation we face isn't on the live side but more on the research side. We use a lot heavier servers than QC has to do our research offline then transfer the final result / param settings into QC for deployment. You might run into this if you have a need to do heavy optimizations / parameter searching for your strategy but still recommend QC to handle the live side so your not having to re create deployment and monitoring on your own servers or AWS etc. QC will also give you access to very good data for much cheaper than having to get the subscriptions yourself.
+
 February 4:
 =================================================
 Met with Jake, took the following notes
