@@ -84,11 +84,11 @@ def createTimeSeriesDiferences(df): # should we also add cumulative sums (??)
 
 
 def timeSeriesScaler(df):
-    """ Start documenting this
+    """ Start documenting this, It is expected that they way we rescale affects our results a lot
     """
     dg = pd.DataFrame(index=df.index)
     for col in df.columns: 
-        dg[col]=df[col].apply(lambda x: list(np.array(x)/x[-1]))
+        dg[col]=df[col].apply(lambda x: list((np.array(x)-x[-1])/x[-1]))
     return dg
 
 

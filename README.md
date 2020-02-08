@@ -1,9 +1,10 @@
 February 6:
 ================================================
-Had a conversation with Spencer:
-* He suggested to keep in mind Shape Ratios: 1 is OK, 5 is good, 7 is excellent
-* He does not like Quantopian/Quantconnect for tests, he says they get to see what you are doing
-* He will send an article and a book about algorithmic trading
+* Had a conversation with Spencer:
+- He suggested to keep in mind Shape Ratios: 1 is OK, 5 is good, 7 is excellent
+- He does not like Quantopian/Quantconnect for tests, he says they get to see what you are doing
+- He will send an article and a book about algorithmic trading
+* Next step: play with the scalings, the overfit we are seeing migh be related to that
 
 
 Febryary 5:

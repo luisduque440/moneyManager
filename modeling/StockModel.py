@@ -51,12 +51,13 @@ def generatePipeline(levelDictionary=None):
     """
     pipeline = Pipeline([
         ('selectcolumns', ColumnSelector()), 
+        ('scaletimeseries', FunctionTransformer(timeSeriesScaler)),
         ('createdifferences', FunctionTransformer(createTimeSeriesDiferences)), 
         ('timeSeriesToFeatures', FunctionTransformer(timeSeriesToFeatures)),
         ('createtimefeatures', FunctionTransformer(createTimeFeatures)),
-        ('fillemptyvalues', TransformationWrapper(SimpleImputer(strategy='median'))),
-        ('scaler', TransformationWrapper(MinMaxScaler())),
-        ('pca', PCA(n_components=30))
+        #('fillemptyvalues', TransformationWrapper(SimpleImputer(strategy='median'))),
+        #('scaler', TransformationWrapper(MinMaxScaler())),
+        #('pca', PCA(n_components=30))
         #('classifier', LogisticRegression(penalty='none', solver='sag', max_iter=1000))
     ])
     return pipeline
@@ -68,7 +69,6 @@ def generatePipeline(levelDictionary=None):
 # try pca asap !!
 
 #('scaletimeseries', FunctionTransformer(timeSeriesScaler)),
-
 #('bayesianencoder', BayesianCategoricalEncoder()),
 #('bayesiantransformer', FunctionTransformer(bayesianTransformer, levelDictionary)),
 
