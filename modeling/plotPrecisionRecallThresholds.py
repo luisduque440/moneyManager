@@ -2,6 +2,34 @@ from sklearn.metrics import precision_recall_curve
 from sklearn.metrics import plot_precision_recall_curve
 import matplotlib.pyplot as plt
 
+import pandas as pd
+import random
+import numpy as np
+from scipy.stats import binom
+import matplotlib.pyplot as plt
+from scipy.stats import beta
+
+# include base rate asap in ALL the plots !
+
+def plotProbabilityOfPrecisionBiggerThan60p(scores, outcomes):
+    df = pd.DataFrame({'outcomes':outcomes, 'scores': scores})
+    df['counter']=1
+    df.outcomes= df.outcomes.apply(int)
+    df = df.sort_values(by='scores', ascending=False)
+    so = df.groupby('scores')['outcomes'].sum()
+    sc = df.groupby('scores')['counter'].sum()
+    dg = pd.concat([so,sc],axis=1)
+    dg = dg.sort_index(ascending=False)
+    dc = dg.cumsum()
+    dc.columns = ['k', 'N']
+    dc['precision']=dc.k/dc.N
+    dc['recall']=dc.k/dc.k.max()
+    dc['P(precision)>0.6']=dc.apply(lambda x: 1-beta.cdf(0.6, 1+x.k, 1+x.N-x.k), axis=1)
+    dc['P(precision)>0.6'].plot(title='Probability that the precision is bigger than 60% at each threshold')
+    plt.xlabel('threshold')
+    plt.show()
+
+
 def plotPrecisionRecallThresholds(model, Xtrain, ytrain, Xtest, ytest):
     """ asdfks
     """
@@ -46,3 +74,9 @@ def plotPrecisionRecallThresholds(model, Xtrain, ytrain, Xtest, ytest):
     plt.plot(thresholdsTest, precisionTest, label='test')
     legend = plt.legend(loc='upper left', shadow=True, fontsize='x-large')
     plt.show()
+    
+    plotProbabilityOfPrecisionBiggerThan60p(model.predict_proba(Xtest)[:,1], ytest)
+    
+    
+    
+    

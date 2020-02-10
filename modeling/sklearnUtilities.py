@@ -82,13 +82,16 @@ def createTimeSeriesDiferences(df): # should we also add cumulative sums (??)
     return df
 
 
-
 def timeSeriesScaler(df):
-    """ Start documenting this, It is expected that they way we rescale affects our results a lot
+    """ Start documenting this, It is expected that they way we rescale affects our results a lot:
+        possible rescalings: 
+        * With respect to the last element of the series
+        * With respect to the mean
+        * With respect to the median
     """
     dg = pd.DataFrame(index=df.index)
     for col in df.columns: 
-        dg[col]=df[col].apply(lambda x: list((np.array(x)-x[-1])/x[-1]))
+        dg[col]=df[col].apply(lambda x: list((np.array(x)-np.median(x))/np.median(x)))
     return dg
 
 
@@ -141,27 +144,29 @@ class BayesianCategoricalEncoder(TransformerMixin):
 
 
 class TransformationWrapper(BaseEstimator, TransformerMixin):
-	"""Scaler wrapper to have pandas compatibility.
+    """Scaler wrapper to have pandas compatibility.
 
-	Example
-	    >> dg = pd.DataFrame({'A':[0.5, 0.6, 0.7]})
-	    >> NumericFeaturesScaler(transformation = MinMaxScaler()).fit(dg).transform(dg)
-	    0  0.0
-	    1  0.5
-	    2  1.0
+    Example
+        >> dg = pd.DataFrame({'A':[0.5, 0.6, 0.7]})
+        >> NumericFeaturesScaler(transformation = MinMaxScaler()).fit(dg).transform(dg)
+        0  0.0
+        1  0.5
+        2  1.0
 
-	Attributes:
-	    transformation: a sklearn transformation, typically a scaler
-	"""
-	def __init__(self, transformation):
-		self.transformation = transformation
+    Attributes:
+        transformation: a sklearn transformation, typically a scaler
+    """
+    def __init__(self, transformation, colnames=None):
+        self.colnames=colnames
+        self.transformation = transformation
 
-	def fit(self, X, y=None):
-		self.transformation.fit(X)
-		return self
+    def fit(self, X, y=None):
+        self.transformation.fit(X)
+        return self
 
-	def transform(self, X):
-		return pd.DataFrame(self.transformation.transform(X), columns = X.columns, index=X.index)
+    def transform(self, X):
+        columns = self.colnames if self.colnames!=None else X.columns
+        return pd.DataFrame(self.transformation.transform(X), columns = columns, index=X.index)
 
 
 class FunctionTransformer(BaseEstimator, TransformerMixin):

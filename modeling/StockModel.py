@@ -55,9 +55,10 @@ def generatePipeline(levelDictionary=None):
         ('createdifferences', FunctionTransformer(createTimeSeriesDiferences)), 
         ('timeSeriesToFeatures', FunctionTransformer(timeSeriesToFeatures)),
         ('createtimefeatures', FunctionTransformer(createTimeFeatures)),
-        #('fillemptyvalues', TransformationWrapper(SimpleImputer(strategy='median'))),
-        #('scaler', TransformationWrapper(MinMaxScaler())),
-        #('pca', PCA(n_components=30))
+        ('fillemptyvalues', TransformationWrapper(SimpleImputer(strategy='median'))),
+        #('pca', TransformationWrapper(PCA(n_components=30), colnames=['PC_'+str(i) for i in range(1,31)])),
+        ('scaler', TransformationWrapper(MinMaxScaler())),
+        
         #('classifier', LogisticRegression(penalty='none', solver='sag', max_iter=1000))
     ])
     return pipeline
