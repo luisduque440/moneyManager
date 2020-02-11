@@ -1,3 +1,8 @@
+February 10:
+===============================================
+* I do not think there is any point obout trying to control the overfit.
+* Check asap if the signal our model is producing is vanishing. 
+
 February 6:
 ================================================
 * Had a conversation with Spencer:

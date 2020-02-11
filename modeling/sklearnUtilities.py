@@ -91,7 +91,7 @@ def timeSeriesScaler(df):
     """
     dg = pd.DataFrame(index=df.index)
     for col in df.columns: 
-        dg[col]=df[col].apply(lambda x: list((np.array(x)-np.median(x))/np.median(x)))
+        dg[col]=df[col].apply(lambda x: list((np.array(x)-np.mean(x))/np.mean(x)))
     return dg
 
 

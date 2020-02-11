@@ -38,6 +38,19 @@ def averageAlpha(ytrue, yScores, P):
 	return np.mean(alpha)
 
 
+def selectThreshold(y, scores, P=0.6, minimalCertainty=0.90):
+	"""
+	"""
+	precision, recall, threshold, alpha = getPrecisionRecallAlpha(y, scores, P)
+	I = [i for i in range(len(alpha)) if alpha[i]>=minimalCertainty]
+	if len(I)>0:
+		index = max(I)
+		return precision[index], recall[index], threshold[index], alpha[index]
+
+	else:
+		return 0,0,0,0
+
+
 
 def getNpvTnrThreshold(ytrue, ypredicted):
 	""" To be implemented
@@ -69,23 +82,29 @@ def plotTrainTestPrecisionRecall(ytrain, ytrainScores, ytest, ytestScores, P=0.6
 	baseRateTest = sum(ytest)/len(ytest)
 	apTrain = average_precision_score(ytrain, ytrainScores)
 	apTest = average_precision_score(ytest, ytestScores)
+	chosenPrecision, chosenRecall, chosenThreshold, chosenAlpha = selectThreshold(ytest, ytestScores)
 
 	plt.plot(recallTrain, precisionTrain, label='train (auc=%1.2f)' %(apTrain))
 	plt.plot(recallTest, precisionTest, label='test (auc=%1.2f)'%(apTest))
 	plt.plot([0,1], [baseRateTest, baseRateTest], 'b-', label='base rate (%1.2f)' %(baseRateTest))
+	plt.plot([chosenRecall,chosenRecall], [0, 1], 'b-', label='operating point')
 	plt.title('precision recall curve')
 	plt.xlabel('recall')
 	plt.ylabel('precision')
 	plt.legend(loc='lower right', shadow=True)
 	plt.show()
 
+
+	plt.plot(thresholdTrain, alphaTrain, label='train '+'(average alpha=%1.2f)'%(averageAlphaTrain))
+	plt.plot(thresholdTest, alphaTest, label='test '+'(average alpha=%1.2f)'%(averageAlphaTest))
+	plt.plot([chosenThreshold,chosenThreshold], [0, 1], 'b-', label='operating point')
 	plt.title('Probability that the precision is bigger than 60 percent')
 	plt.xlabel('threshold')
 	plt.ylabel('probability')
-	plt.plot(thresholdTrain, alphaTrain, label='train '+'(average alpha=%1.2f)'%(averageAlphaTrain))
-	plt.plot(thresholdTest, alphaTest, label='test '+'(average alpha=%1.2f)'%(averageAlphaTest))
 	plt.legend(loc='upper left', shadow=True)
 	plt.show()
+
+	print(chosenPrecision, chosenRecall, chosenThreshold, chosenAlpha) 
 
 
 def plotTrainTestPrecisionRecallUsingModel(model, Xtrain, ytrain, Xtest, ytest, P=0.6):
