@@ -17,6 +17,11 @@ from sklearn.decomposition import PCA
 
 class stockModel():
     """Wrapper of a single pipeline with its respective thresholds, train datasets,  evaluators, performance
+        Requirements:
+            * Data is fed to this class minute by minute in chronological order.
+            * The model automatically decides to retrain itself when results are 'no longer satisfyin expectations'
+            * The way in which the previous point should be implemented involves looking at thresholds in a Bayesian way. 
+
     """
     def __init__(self, stockSymbol, startDay, endDay):
         self.stockSymbol = stockSymbol
