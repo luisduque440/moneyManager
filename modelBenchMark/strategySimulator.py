@@ -2,10 +2,10 @@ import pandas as pd
 import random
 import numpy as np
 from datetime import datetime
-from modeling.loadTimeSeries import loadTimeSeries
-from modeling.loadTimeSeries import getListOfAvailableStocks
-from modeling.loadTimeSeries import loadPriceTimeSeries
-from modeling.marketSimulator import marketSimulator
+from marketUtilities.loadTimeSeries import loadTimeSeries
+from marketUtilities.loadTimeSeries import getListOfAvailableStocks
+from marketUtilities.loadTimeSeries import loadPriceTimeSeries
+from marketUtilities.marketSimulator import marketSimulator
 
 priceTimeSeries = loadPriceTimeSeries()
 bestPossiblePredictions = {stock: priceTimeSeries[stock].shift(-20)>priceTimeSeries[stock].shift(-1) for stock in priceTimeSeries}    

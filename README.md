@@ -1,9 +1,12 @@
-February 24:
+
+February 24: Notes before starting to work
 =============================================
 * Have not worked on this for quite a while, but have been thinking about it.
 * A good thing to have is a balanced target, the more balanced, the better.
 * I want to try to cook a new 'fully balanced' target. Maybe using stock moves from the past 100 (1000) minutes.
-* Also need to implement asap an algo that keeps updating the threshold in a Bayesian way. 
+* Also need to implement asap an algo that keeps updating the threshold in a Bayesian way... do this next !! 
+* Codebase is confusing, make it clearer/straightforward to undertand.
+* Note:  now I have a target that is way more balanced than the one we had before !!!! see creatingAFullyBalancedTarget.ipynb 
 
 
 February 11: 
