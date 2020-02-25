@@ -1,3 +1,10 @@
+February 24:
+=============================================
+* Have not worked on this for quite a while, but have been thinking about it.
+* A good thing to have is a balanced target, the more balanced, the better.
+* I want to try to cook a new 'fully balanced' target. Maybe using stock moves from the past 100 (1000) minutes.
+* Also need to implement asap an algo that keeps updating the threshold in a Bayesian way. 
+
 
 February 11: 
 ==============================================
