@@ -7,13 +7,22 @@ from marketUtilities.loadTimeSeries import getListOfAvailableStocks
 from marketUtilities.loadTimeSeries import loadPriceTimeSeries
 from marketUtilities.marketSimulator import marketSimulator
 
+
+def createBalancedTargetFromTimeSeries(s, memSize=60):
+    """ Sweet and elegant.
+    """
+    d=(s.shift(-20)-s.shift(-1))
+    rollingMean = d.rolling(memSize).mean()
+    return (d>rollingMean)
+
 priceTimeSeries = loadPriceTimeSeries()
-bestPossiblePredictions = {stock: priceTimeSeries[stock].shift(-20)>priceTimeSeries[stock].shift(-1) for stock in priceTimeSeries}    
+bestPossiblePredictions = {stock: createBalancedTargetFromTimeSeries(priceTimeSeries[stock]) for stock in priceTimeSeries}    
 
 def simulateStrategyMultipleTimes(precision, recall, availableStocks, numSimulations):
     outcome = []
     numMovements = []
     for i in range(numSimulations):
+        print(i)
         strategy =strategySimulatorWithMultipleStocks(precision, recall, availableStocks)
         outcome.append(marketSimulator(strategy).values[-1])
         numMovements.append(countPositionChanges(strategy))
@@ -28,8 +37,8 @@ def strategySimulatorWithMultipleStocks(precision, recall, availableStocks, star
     strategyTimes = [t for t in availableMarketMinutes if t>=startTime and t<endTime]
     possibleMoves=[[] for _ in range(len(strategyTimes))]
     
+
     for stock in availableStocks:
-        
         allPositives = bestPossiblePredictions[stock].value_counts()[True]
         predictedPositives = int(allPositives*recall/precision)
         truePositives = int(precision*predictedPositives)
@@ -47,21 +56,24 @@ def strategySimulatorWithMultipleStocks(precision, recall, availableStocks, star
         else:
             strategy[i] = random.choice(possibleMoves[i])
             
-    
-    counter = 1 # force our positions to be held for at least 20 minutes
+    strategy = keepPositionsForAtLeastNMins(strategy, N=20)
+    strategy = pd.Series(strategy, index=strategyTimes)
+    return strategy
+
+
+def keepPositionsForAtLeastNMins(strategy, N=20):
+    counter = 1 
     for i in range(1, len(strategy)):
         if strategy[i]==strategy[i-1]:
             counter+=1
         else:
-            if counter<20:
+            if counter<N:
                 strategy[i]=strategy[i-1]
                 counter+=1
             else:
                 counter=0
-    
-    
-    strategy=pd.Series(strategy, index=strategyTimes)
     return strategy
+    
 
 
 def countPositionChanges(strategy):

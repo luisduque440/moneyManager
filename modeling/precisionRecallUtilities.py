@@ -8,8 +8,6 @@ from scipy.stats import beta
 from sklearn.metrics import average_precision_score
 
 
-# all the inputs are
-
 def getPrecisionRecallAlpha(y, scores, P=0.6):
 	""" re
 	"""
@@ -103,9 +101,6 @@ def plotTrainTestPrecisionRecall(ytrain, ytrainScores, ytest, ytestScores, P=0.6
 	plt.ylabel('probability')
 	plt.legend(loc='upper left', shadow=True)
 	plt.show()
-
-	print(chosenPrecision, chosenRecall, chosenThreshold, chosenAlpha) 
-
 
 def plotTrainTestPrecisionRecallUsingModel(model, Xtrain, ytrain, Xtest, ytest, P=0.6):
 	ytrainScores = model.predict_proba(Xtrain)[:,1]

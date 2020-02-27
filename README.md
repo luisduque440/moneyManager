@@ -1,3 +1,7 @@
+February 26:
+=============================================
+* The strategySimulator.py needs very serious work
+
 
 February 24: Notes before starting to work
 =============================================

@@ -9,8 +9,6 @@ from scipy.stats import binom
 import matplotlib.pyplot as plt
 from scipy.stats import beta
 
-# include base rate asap in ALL the plots !
-
 def plotProbabilityOfPrecisionBiggerThan60p(scores, outcomes):
     df = pd.DataFrame({'outcomes':outcomes, 'scores': scores})
     df['counter']=1
@@ -76,7 +74,4 @@ def plotPrecisionRecallThresholds(model, Xtrain, ytrain, Xtest, ytest):
     plt.show()
     
     plotProbabilityOfPrecisionBiggerThan60p(model.predict_proba(Xtest)[:,1], ytest)
-    
-    
-    
     
