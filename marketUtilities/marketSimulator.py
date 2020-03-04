@@ -4,6 +4,14 @@ from .loadTimeSeries import loadIncreaseTimeSeries
 
 stockSeriesIncreases = loadIncreaseTimeSeries()
 
+def getIncreasesTS(positionTS, initialAmount=1.0):
+	positionDF= positionTS.reset_index().copy()
+	positionDF.columns = ['date', 'position']
+	increases = positionDF.apply(lambda x: stockSeriesIncreases[x.position][x.date], axis=1)
+	increases.index= positionTS.index
+	increases.values[0]=initialAmount
+	return increases
+
 # bad name bot for the function and for the file
 def marketSimulator(positionTS, initialAmount=1.0):
 	"""
@@ -11,10 +19,19 @@ def marketSimulator(positionTS, initialAmount=1.0):
 		initialAmount: amount of cash that we have at the beginning
 		returns: time series with the money if we held the assets specified on positionTS
 	"""
-	positionDF= positionTS.reset_index().copy()
-	positionDF.columns = ['date', 'position']
-	positionIncreases = positionDF.apply(lambda x: stockSeriesIncreases[x.position][x.date], axis=1)
-	positionIncreases.index= positionTS.index
-	positionIncreases.values[0]=initialAmount
-	positionValue = positionIncreases.cumprod()
+	increases = getIncreasesTS(positionTS, initialAmount)
+	positionValue = increases.cumprod()
 	return positionValue
+
+
+def getPercentageOfIncreases(positionTS, initialAmount=1.0):
+	""" This has never been tested
+	"""
+	increases = getIncreasesTS(positionTS, initialAmount)
+	positiveIncreases = (increases>1.0).sum()
+	return 1.0*positiveIncreases/len(increases)
+
+
+
+
+

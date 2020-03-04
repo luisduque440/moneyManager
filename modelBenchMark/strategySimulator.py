@@ -6,40 +6,39 @@ from marketUtilities.loadTimeSeries import loadTimeSeries
 from marketUtilities.loadTimeSeries import getListOfAvailableStocks
 from marketUtilities.loadTimeSeries import loadPriceTimeSeries
 from marketUtilities.marketSimulator import marketSimulator
-
+from marketUtilities.marketSimulator import getPercentageOfIncreases
 
 def strategySimulator(precision, recall, stocks, startDay, endDay, createTarget, numSimulations):
     """ Document this asap
     """
-    outcome = []
+    outcomes = []
     numMovements = []
+    positiveIncreasesPct = [] 
     for i in range(numSimulations):
-        print(i, end =' ')
+        print('.', end ='')
         strategy =simulateSingleStrategy(precision, recall, stocks, startDay, endDay, createTarget)
-        outcome.append(marketSimulator(strategy).values[-1])
+        outcomes.append(marketSimulator(strategy).values[-1])
         numMovements.append(countPositionChanges(strategy))
-    return outcome, numMovements
+        positiveIncreasesPct.append(getPercentageOfIncreases(strategy))
+    return outcomes, numMovements, positiveIncreasesPct
     
 
 def simulateSingleStrategy(precision, recall, stocks, startDay, endDay, createTarget):
-    """ Document Asap
+    """ Notice that modelSuggestions are build from the modelOutcomes, they might be slightly different.
     """
     modelOutcomes = {s: simulateModelOutcome(precision, recall, s, startDay, endDay, createTarget) for s in stocks}
-    #print(modelOutcomes)
-    possibleMoves = getPossibleMoves(modelOutcomes)
-    #print(possibleMoves)
-    strategy = generateStrategyFromPossibleMoves(possibleMoves, random.choice(stocks))
-    #print(strategy)
+    modelSuggestions = {s : modelOutcomes[s].shift(1).fillna(False) for s in modelOutcomes}
+    possibleMoves = getPossibleMoves(modelSuggestions)
+    strategy= possibleMoves.apply(lambda x: random.choice(x) if len(x)>0 else None)
+    strategy.values[0] = random.choice(stocks)
     strategy = keepPositionsForAtLeastNMins(strategy, N=20)
-    marketMinutes = loadTimeSeries(stocks[0], startDay, endDay).index
-    strategy = pd.Series(strategy, index=marketMinutes)
     return strategy
-
 
 def simulateModelOutcome(precision, recall, stock, startDay, endDay, createTarget):
     """ Simulate the outcome of a single model.
     """
     price = loadTimeSeries(stock, startDay, endDay).consolidated
+    marketMinutes = price.index
     idealPredictions = createTarget(price)
     totalPositives = idealPredictions.value_counts()[True]
     positivesToChoose = int(totalPositives*recall/precision)
@@ -54,51 +53,43 @@ def simulateModelOutcome(precision, recall, stock, startDay, endDay, createTarge
     modelOutcome=[False for _ in range(numMinutes)]
     for p in PP:  
         modelOutcome[p]=True
-    return modelOutcome
+    return pd.Series(modelOutcome, index=marketMinutes)
 
 
-def getPossibleMoves(modelOutcomes):
-    """ Returns a list with the possible moves that the modelOutcomes suggest minute by minute, for example:
+def getPossibleMoves(modelSuggestions):
+    """ Notice that we need to compensate 
+        Returns a list with the possible moves that the modelOutcomes suggest minute by minute, for example:
         [['GS', 'IBM'], [], [], ['GS'], ['GS'], ['GS'], [], [], ['IBM'], ...]
     """
-    firstStock = list(modelOutcomes.keys())[0]
-    numMinutes=len(modelOutcomes[firstStock])
+    firstStock = list(modelSuggestions.keys())[0]
+    marketMinutes = modelSuggestions[firstStock].index
+    numMinutes=len(marketMinutes)
     possibleMoves=[[] for _ in range(numMinutes)]
-    for stock in modelOutcomes:
+    for stock in modelSuggestions:
         for i in range(numMinutes):
-            if modelOutcomes[stock][i]:
+            if modelSuggestions[stock].values[i]:
                 possibleMoves[i].append(stock)
-    return possibleMoves
+    return pd.Series(possibleMoves, index=marketMinutes)
 
-
-def generateStrategyFromPossibleMoves(possibleMoves, firstPosition):
-    """ Picks a single strategy at random from a list with possibleMoves
-    """
-    numMinutes = len(possibleMoves)
-    strategy = [None for _ in range(numMinutes)]
-    strategy[0] = firstPosition
-    for i in range(1, len(strategy)):
-        if len(possibleMoves[i])==0:
-            strategy[i]=strategy[i-1]
-        else:
-            strategy[i] = random.choice(possibleMoves[i])
-    return strategy
 
 def keepPositionsForAtLeastNMins(strategy, N=20):
     """ Modifies a strategy so that each position is kept for at least N minutes
     """
+    #strategy.values[i] = strategy.values[i-1] if strategy.values[i]==None else strategy.values[i]
     counter = 1 
     for i in range(1, len(strategy)):
-        if strategy[i]==strategy[i-1]:
+        if strategy.values[i]==None:
+            strategy.values[i]=strategy.values[i-1]
+            counter+=1
+        elif strategy.values[i]==strategy.values[i-1]:
             counter+=1
         else:
             if counter<N:
-                strategy[i]=strategy[i-1]
+                strategy.values[i]=strategy.values[i-1]
                 counter+=1
             else:
                 counter=0
     return strategy
-    
 
 
 def countPositionChanges(strategy):
