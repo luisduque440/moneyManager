@@ -202,7 +202,7 @@ class sampleTransformer(BaseEstimator, TransformerMixin):
    
 
 
-# going to need some sort of refined way of doing crossvalidation
+# going to need some sort of refined way of doing crossvalidation, really?
 # https://hub.packtpub.com/cross-validation-strategies-for-time-series-forecasting-tutorial/
 # blocking Time Series?
 

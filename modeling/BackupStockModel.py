@@ -23,28 +23,14 @@ class stockModel():
             * The way in which the previous point should be implemented involves looking at thresholds in a Bayesian way. 
 
     """
-    def __init__(self, stock, requiredTrainingSamples= 3000, requiredEvaluationSamples=200, 
-                              requiredPrecision, requiredRecall, ):
-
-        self.requiredTrainingSamples = requiredTrainingSamples
-        self.requiredEvaluationSamples = requiredEvaluationSamples
-        self.stock = stock
-        self.model = None
-        
-
-    def getModelSuggestions(currentTime):
-        self.gatherEvaluationSamples()
-        if self.modelIsValid():
-            threshold = 
-
-
-
-    def modelIsValid(currentTime):
-        print('many reasons model is not valid')
-
-    def getModelThreshold():
-        # really
-
+    def __init__(self, stockSymbol, startDay, endDay):
+        self.stockSymbol = stockSymbol
+        self.startDay = startDay
+        self.endDay = endDay
+        self.validModel = None
+        self.pipelineInfo = {}
+        self.percentageOfDataSetAvailable = None
+    
     def fullyTrain(self):
         self.gatherData()
         return self
