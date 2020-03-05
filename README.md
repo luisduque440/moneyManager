@@ -1,3 +1,8 @@
+March 4:
+============================================
+* I trust the state of the models and the way I am checking if they work
+* Jake suggest to include as a time series features: bar['high']-bar['low']
+
 February 26:
 =============================================
 * The strategySimulator.py needs very serious work

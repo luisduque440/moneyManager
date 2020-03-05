@@ -24,30 +24,40 @@ class stockModel():
 
     """
     def __init__(self, stock, requiredTrainingSamples= 3000, requiredEvaluationSamples=200, 
-                              requiredPrecision, requiredRecall, ):
+    				   requiredPrecision=0.55, requiredRecall=0.5, requiredCertainty=0.9):
 
+        self.stock = stock
         self.requiredTrainingSamples = requiredTrainingSamples
         self.requiredEvaluationSamples = requiredEvaluationSamples
-        self.stock = stock
+        self.requiredPrecision = requiredPrecision 
+        self.requiredRecall = requiredRecall 
+        self.requiredCertainty = requiredCertainty
         self.model = None
         
 
-    def getModelSuggestions(currentTime):
-        self.gatherEvaluationSamples()
-        if self.modelIsValid():
-            threshold = 
+    def getModelSuggestion(self, currentTime):
+    	self.currentTime = currentTime
+    	order=self.generateNullOrder()
+        if self.modelIsValid() and self.thresholdedOutput():
+  			order = self.generateBuyOrder()
+     	else:
+     		if self.modelHasNotBeenTrainedInAWhile():
+     			self.train()
+     	return order 
+  			
 
-
-
-    def modelIsValid(currentTime):
-        print('many reasons model is not valid')
-
-    def getModelThreshold():
-        # really
-
-    def fullyTrain(self):
+  	def train(self):
+  		N=self.requiredTrainingSamples + self.requiredEvaluationSamples
         self.gatherData()
         return self
+
+    def modelIsValid(self):
+  		
+
+    def getModelThreshold(self):
+        # really
+
+
 
 
     def gatherData(self):
@@ -82,6 +92,28 @@ def generatePipeline(levelDictionary=None):
     ])
     return pipeline
 
+
+
+
+
+	def generateBuyOrder(self):
+		buyOrder =  {'orderType': 'BUY', 
+				'stock': self.stock,  
+				'generatedAt': datetime.now(), 
+				'expiresAt': datetime(2040,1,1)
+				'precision': 0.666,
+				'recall': 0.222}
+		return buyOrder
+
+
+	def generateNullOrder(self):
+		buyOrder =  {'orderType': 'NULL', 
+				'stock': self.stock,  
+				'generatedAt': datetime.now(), 
+				'expiresAt': datetime(2040,1,1)
+				'precision': 0.666,
+				'recall': 0.222}
+		return buyOrder
 
 #X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
 #pca = PCA(n_components=2)
