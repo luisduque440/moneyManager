@@ -1,13 +1,14 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from loadTimeSeries import loadTimeSeries
+from loadData.loadTimeSeries import loadTimeSeries
+from modeling.createTarget import createTarget
 
 def createTrainingDataSet(stock1, startDay, endDay, pastStart=20):
     """ start documenting this 
     """
     ds = loadTimeSeries(stock1, startDay, endDay)
-    ds['target'] = (ds.consolidated.shift(-20)>ds.consolidated.shift(-1))
+    ds['target'] = createTarget(ds)
     columnsToPivot = list(ds.columns)
     columnsToPivot.remove('target')
     df = pivotWindow(ds, pastStart, -1, columnsToPivot)

@@ -1,3 +1,4 @@
+
 import pandas as pd
 def createTarget(barSeries, memSize=120):
     """ An overly pesimistic buy-sell scenario

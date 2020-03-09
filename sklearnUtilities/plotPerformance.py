@@ -39,13 +39,13 @@ def plotPerformance(ytrain, ytrainScores, ytest, ytestScores, requiredPrecision=
 	plt.title('Probability that the precision is bigger than %3.2f %%'%(100*requiredPrecision))
 	plt.xlabel('threshold')
 	plt.ylabel('probability')
-	plt.legend(loc='upper left', shadow=True)
+	plt.legend(loc='lower right', shadow=True)
 	plt.show()
 
-def plotTrainTestPrecisionRecallUsingModel(model, Xtrain, ytrain, Xtest, ytest, requiredPrecision=0.55, requiredCertainty=0.9):
+def plotPerformanceUsingModel(model, Xtrain, ytrain, Xtest, ytest, requiredPrecision=0.55, requiredCertainty=0.9):
 	ytrainScores = model.predict_proba(Xtrain)[:,1]
 	ytestScores = model.predict_proba(Xtest)[:,1]
-	plotTrainTestPrecisionRecall(ytrain, ytrainScores, ytest, ytestScores, requiredPrecision, requiredCertainty)
+	plotPerformance(ytrain, ytrainScores, ytest, ytestScores, requiredPrecision, requiredCertainty)
 
 
 

@@ -9,7 +9,7 @@ endDay = datetime(2020,1,1)
 
 
 def loadTimeSeries(stock, startDay=startDay, endDay=endDay):
-    """ 
+    """ this should be better called loadCandleData(?)
     """
     filename = stock+'.csv'
     df = pd.read_csv(dataPath+filename).drop(columns=['symbol'])
@@ -17,7 +17,8 @@ def loadTimeSeries(stock, startDay=startDay, endDay=endDay):
     df = df[(df.date>=startDay) & (df.date<endDay)].copy()
     df = df.set_index('date')
     df.columns = ['open','high','low','close','volume']
-    df['consolidated']=df.drop(columns='volume').mean(axis=1)
+    # (the following does not belong here !!!!!!)
+    df['consolidated']=df.drop(columns='volume').mean(axis=1) 
     return df
 
 def loadPriceTimeSeries(startDay=startDay, endDay=endDay, stockList=None):
