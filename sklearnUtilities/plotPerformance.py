@@ -1,7 +1,11 @@
+import matplotlib.pyplot as plt
+from sklearn.metrics import average_precision_score
+from .precisionRecallUtilities import getPrecisionRecallAlpha
+from .precisionRecallUtilities import averageAlpha
+from .precisionRecallUtilities import selectThreshold
 
 
-
-def plotPerformance(ytrain, ytrainScores, ytest, ytestScores, requiredPrecision=0.55, requiredCertainty=0.9):
+def plotPerformance(ytrain, ytrainScores, ytest, ytestScores, requiredPrecision=0.55, requiredRecall=None, requiredCertainty=0.9):
 	""" Comment
 	"""
 	precisionTrain, recallTrain, thresholdTrain, alphaTrain = getPrecisionRecallAlpha(ytrain, ytrainScores, requiredPrecision)
@@ -12,7 +16,7 @@ def plotPerformance(ytrain, ytrainScores, ytest, ytestScores, requiredPrecision=
 	baseRateTest = sum(ytest)/len(ytest)
 	apTrain = average_precision_score(ytrain, ytrainScores)
 	apTest = average_precision_score(ytest, ytestScores)
-	chosenPrecision, chosenRecall, chosenThreshold, chosenAlpha = selectThreshold(ytest, ytestScores, requiredPrecision, requiredCertainty)
+	chosenPrecision, chosenRecall, chosenThreshold, chosenAlpha = selectThreshold(ytest, ytestScores, requiredPrecision, requiredRecall, requiredCertainty)
 
 	plt.plot(recallTrain, precisionTrain, label='train (auc=%1.2f)' %(apTrain))
 	plt.plot(recallTest, precisionTest, label='test (auc=%1.2f)'%(apTest))

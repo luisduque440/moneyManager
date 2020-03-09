@@ -3,7 +3,7 @@ from os import listdir
 from os.path import isfile, join
 from datetime import datetime
 
-dataPath = '/Users/lduque/Desktop/myProjects/moneyManager/data/quantopian/minuteIntraday/'
+dataPath = '/Users/lduque/Desktop/myProjects/moneyManager/loadData/data/quantopian/minuteIntraday/'
 startDay = datetime(2019,1,1)
 endDay = datetime(2020,1,1)
 

@@ -3,9 +3,8 @@ import matplotlib.pyplot as plt
 import random
 import numpy as np
 from scipy.stats import binom
-import matplotlib.pyplot as plt
 from scipy.stats import beta
-from sklearn.metrics import average_precision_score
+ 
 
 
 def getPrecisionRecallAlpha(y, scores, requiredPrecision):
@@ -50,25 +49,3 @@ def selectThreshold(y, scores, requiredPrecision, requiredRecall, requiredCertai
 
 	else:
 		return None,None,None,None
-
-
-
-def getNpvTnrThreshold(ytrue, ypredicted):
-	""" To be implemented
-	"""
-	pass
-
-
-
-
-def getProbabilityNpvIsBiggerThanP(ytrue, ypredict, requiredPrecision):
-	""" To be implemented
-	"""
-	pass
-
-
-def adjustedAverageNPV(ytrue, ypredict, requiredPrecision):
-	""" To be implemented
-	"""
-	pass
-

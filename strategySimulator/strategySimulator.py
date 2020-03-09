@@ -2,11 +2,11 @@ import pandas as pd
 import random
 import numpy as np
 from datetime import datetime
-from marketUtilities.loadTimeSeries import loadTimeSeries
-from marketUtilities.loadTimeSeries import getListOfAvailableStocks
-from marketUtilities.loadTimeSeries import loadPriceTimeSeries
-from marketUtilities.marketSimulator import marketSimulator
-from marketUtilities.marketSimulator import getPercentageOfIncreases
+from loadData.loadTimeSeries import loadTimeSeries
+from loadData.loadTimeSeries import getListOfAvailableStocks
+from loadData.loadTimeSeries import loadPriceTimeSeries
+from marketSimulator.marketSimulator import marketSimulator
+from marketSimulator.marketSimulator import getPercentageOfIncreases
 
 def strategySimulator(precision, recall, stocks, startDay, endDay, createTarget, numSimulations):
     """ Document this asap
