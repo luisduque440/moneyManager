@@ -8,6 +8,7 @@ from modeling.sklearnUtilities import BayesianCategoricalEncoder
 from modeling.sklearnUtilities import bayesianTransformer
 from modeling.sklearnUtilities import createTimeSeriesDiferences
 from modeling.sklearnUtilities import FunctionTransformer
+from modeling.precisionRecallUtilities import selectThreshold
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
@@ -33,7 +34,7 @@ class stockModel():
         self.requiredRecall = requiredRecall 
         self.requiredCertainty = requiredCertainty
         self.model = None
-        
+
 
     def getModelSuggestion(self, currentTime):
     	self.currentTime = currentTime
@@ -41,35 +42,52 @@ class stockModel():
         if self.modelIsValid() and self.thresholdedOutput():
   			order = self.generateBuyOrder()
      	else:
-     		if self.modelHasNotBeenTrainedInAWhile():
-     			self.train()
+     		self.train()
      	return order 
   			
 
   	def train(self):
-  		N=self.requiredTrainingSamples + self.requiredEvaluationSamples
-        self.gatherData()
-        return self
+  		""" 
+  		"""
+        self.getTrainDataSets()
+        self.getEvaluationDataSet()
 
+		classifiers = [NaiveBayes(), logisticRegression(), ridge(), lasso()]
+        for clf in classifiers:
+        	self.model = generatePipeline(clf)
+        	self.model.fit(self.Xtrain, self.ytrain)
+        	_,_, self.threshold, _ = selectThreshold(y, scores, requiredPrecision, requiredRecall, requiredCertainty)
+        	if self.modelIsValid():
+        		break
+		
     def modelIsValid(self):
-  		
+		if self.threshold==None or self.modelHasNotBeenTrainedInAWhile(): 
+			return False
+		return True
 
     def getModelThreshold(self):
         # really
-
-
-
-
-    def gatherData(self):
-        df = pd.DataFrame()
-        return df
-
-    def getLatestOrderSuggestions(self):
         return 
 
 
+    def thresholdedOutput(self):
+    	return 
 
-def generatePipeline(levelDictionary=None):
+    def modelHasNotBeenTrainedInAWhile(self):
+    	return
+
+    def getTrainDataSets(self):
+        df = pd.DataFrame()
+        return df
+
+    def getEvaluationDataSet(self):
+        df = pd.DataFrame()
+        return df
+
+
+#('classifier', LogisticRegression(penalty='none', solver='sag', max_iter=1000))
+def generatePipeline(classifier):
+	
     """ start documenting this 
     To do:
         0) The name of this should change: generateTimeSeriesPipeline()
@@ -88,7 +106,6 @@ def generatePipeline(levelDictionary=None):
         #('pca', TransformationWrapper(PCA(n_components=30), colnames=['PC_'+str(i) for i in range(1,31)])),
         ('scaler', TransformationWrapper(MinMaxScaler())),
         
-        #('classifier', LogisticRegression(penalty='none', solver='sag', max_iter=1000))
     ])
     return pipeline
 
@@ -117,10 +134,6 @@ def generatePipeline(levelDictionary=None):
 
 #X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
 #pca = PCA(n_components=2)
-
-# try pca asap !!
-
 #('scaletimeseries', FunctionTransformer(timeSeriesScaler)),
-#('bayesianencoder', BayesianCategoricalEncoder()),
-#('bayesiantransformer', FunctionTransformer(bayesianTransformer, levelDictionary)),
+
 

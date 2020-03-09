@@ -37,9 +37,9 @@ def simulateSingleStrategy(precision, recall, stocks, startDay, endDay, createTa
 def simulateModelOutcome(precision, recall, stock, startDay, endDay, createTarget):
     """ Simulate the outcome of a single model.
     """
-    price = loadTimeSeries(stock, startDay, endDay).consolidated
-    marketMinutes = price.index
-    idealPredictions = createTarget(price)
+    barSeries = loadTimeSeries(stock, startDay, endDay)
+    marketMinutes = barSeries.index
+    idealPredictions = createTarget(barSeries)
     totalPositives = idealPredictions.value_counts()[True]
     positivesToChoose = int(totalPositives*recall/precision)
     truePositivesToChoose = int(precision*positivesToChoose)
@@ -101,13 +101,9 @@ def countPositionChanges(strategy):
     return counter
 
 
-def testCaseForModelSimulator(STOCK):
-    """ 
-    Ugly and temporal !
-    Use the following in test_marketSimulator.py .... repeated but used in the notebook
-    Not even sure about what I want to do with this, or why is this here
+def getGainOfOnlyOneStockStrategy(stock, startDay, endDay):
+    """ Gain==ROI (?)
     """
-    S=loadTimeSeries(STOCK, datetime(2019,1,1), datetime(2020,1,1)).consolidated
-    positionTS=pd.Series([STOCK]*len(S),index=S.index)
-    win = marketSimulator(positionTS, initialAmount=1)
-    return win.values[-1]
+    marketTimes = loadTimeSeries(stock, startDay, endDay).index
+    onlyOne = pd.Series([stock]*len(marketTimes), index=marketTimes)
+    return marketSimulator(onlyOne, initialAmount=1)[-1]
