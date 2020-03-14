@@ -4,11 +4,9 @@ from os.path import isfile, join
 from datetime import datetime
 
 dataPath = '/Users/lduque/Desktop/myProjects/moneyManager/loadData/data/quantopian/minuteIntraday/'
-startDay = datetime(2019,1,1)
-endDay = datetime(2020,1,1)
 
 
-def loadTimeSeries(stock, startDay=startDay, endDay=endDay):
+def loadTimeSeries(stock, startDay, endDay):
     """ this should be better called loadCandleData(?)
     """
     filename = stock+'.csv'
@@ -21,12 +19,12 @@ def loadTimeSeries(stock, startDay=startDay, endDay=endDay):
     df['consolidated']=df.drop(columns='volume').mean(axis=1) 
     return df
 
-def loadPriceTimeSeries(startDay=startDay, endDay=endDay, stockList=None):
+def loadPriceTimeSeries(startDay, endDay, stockList=None):
     stockList = getListOfAvailableStocks() if stockList==None else stockList
     fullTimeSeries = {S: loadTimeSeries(S, startDay, endDay).consolidated for S in stockList}
     return fullTimeSeries
 
-def loadIncreaseTimeSeries(startDay=startDay, endDay=endDay, stockList=None):
+def loadIncreaseTimeSeries(startDay, endDay, stockList=None):
     stockList = getListOfAvailableStocks() if stockList==None else stockList
     availablePrices = loadPriceTimeSeries(startDay, endDay, stockList)
     return {S: (1+availablePrices[S].pct_change()).fillna(1) for S in availablePrices}
