@@ -12,7 +12,6 @@ def getIncreasesTS(positionTS, initialAmount=1.0):
 	increases.values[0]=initialAmount
 	return increases
 
-# bad name bot for the function and for the file
 def marketSimulator(positionTS, initialAmount=1.0):
 	"""
 		positionTimeSeries: a pd.Series indexed with times having the name of the asset that is held minute by minute

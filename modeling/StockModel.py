@@ -1,7 +1,16 @@
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
+from sklearn.preprocessing import MinMaxScaler
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegressionCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import BernoulliNB
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import TimeSeriesSplit
 from sklearnUtilities.preprocessors import ColumnSelector
 from sklearnUtilities.preprocessors import timeSeriesScaler
 from sklearnUtilities.preprocessors import timeSeriesToFeatures 
@@ -12,10 +21,7 @@ from sklearnUtilities.preprocessors import bayesianTransformer
 from sklearnUtilities.preprocessors import createTimeSeriesDiferences
 from sklearnUtilities.preprocessors import FunctionTransformer
 from sklearnUtilities.precisionRecallUtilities import selectThreshold
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.impute import SimpleImputer
-from sklearn.linear_model import LogisticRegression
-from sklearn.decomposition import PCA
+from sklearnUtilities.modeling import createTrainingDataSet
 
 
 
@@ -42,89 +48,102 @@ class stockModel():
     def getModelSuggestion(self, currentTime):
         """ This function should be called every minute
         """
-        self.currentTime=currentTime
+        self.currentTime = currentTime
+        self.threshold = self.getModelThreshold()
         if self.modelRequiresTraining(): self.train()
-        self.getModelThreshold()
-        modelSuggestsToBuy = self.modelIsValid() and self.thresholdedOutput()
+        modelSuggestsToBuy = self.threshold!=None and self.thresholdedOutput()==True
         order=self.generateBuyOrder() if modelSuggestsToBuy else self.generateNullOrder()
         return order 
 
 
-
-
-
     def train(self):
+        """ Always picks the model witht he biggest auc, does not care about thresholds
         """
-        """
-        self.modelDate=self.currentTime
+        self.modelDate = self.currentTime
         Xtrain, ytrain = self.gatherTrainDataSet()
         Xeval, yeval = self.gatherEvaluationDataSet()
+        cv = TimeSeriesSplit(n_splits=2)
         classifiers = [
             BernoulliNB(), 
             LogisticRegression(penalty='none'), 
-            LogisticRegressionCV(penalty='l1', Cs = 10**np.linspace(-4,1,50),  cv=5, random_state=0), 
-            LogisticRegressionCV(penalty='l2', Cs = 10**np.linspace(-5,0,100), cv=5, random_state=0)
+            LogisticRegressionCV(penalty='l1', Cs = 10**np.linspace(-4,1,50),  cv=cv, random_state=0, scoring='auc'), 
+            LogisticRegressionCV(penalty='l2', Cs = 10**np.linspace(-5,0,50), cv=cv, random_state=0, scoring='auc')
         ]
-
-        #import numpy as np
-        #from sklearn.metrics import roc_auc_score
-        #y_true = np.array([0, 0, 1, 1])
-        #y_scores = np.array([0.1, 0.4, 0.35, 0.8])
-        #roc_auc_score(y_true, y_scores)
 
         pipelines = [generatePipeline(clf) for clf in classifiers]
         for p in pipelines: pl.fit(Xtrain, ytrain)
-        areasUnderCurves = [auc(clf, Xeval, yeval) for p in pipelines]
+        areasUnderCurves = [roc_auc_score(yeval, p.predict_proba(Xeval)[:,1]) for p in pipelines]
         self.model = pipelines[np.argmax(areasUnderCurves)]
 
-    def modelIsValid(self):
-        """ A model is valid if the following happens:
-            (1) The threshold is valid: i.e. we precision, recall and alpha are big enough
-            (2) We are not at the beginning of the day (?)
-        """
-    	return True
-
-    def getModelThreshold(self):
-        """ Implemented somewherelse
-        """
-        return 
-
-    def thresholdedOutput(self):
-    	return 
 
     def modelRequiresTraining(self):
-        """ Still not very well defined
+        """ 
+        To do:
+            * Alternative way: many heuristics can be tried here, depending on if/how model is valid working.
         """
-    	return
+        if self.threshold==None and self.modelHasNotBeenTrainedInAWhile():
+            return True
+        return False
+
+
+    def getModelThreshold(self):
+        """ Returns None if its not possible to satisfy the requirements
+        """
+        Xeval, yeval = self.gatherEvaluationDataSet()
+        scores = self.model.predict_proba(Xeval)[:,1]
+        p,r,threshold,a = selectThreshold(y, scores, self.requiredPrecision, self.requiredRecall, self.requiredCertainty)
+        return threshold
+
+    def thresholdedOutput(self):
+        """ Somehow this piece of the puzzle does not feel entirely right.
+            This cannot be right, very careful!!
+        """
+
+
+    	return 
 
     def getTrainDataSet(self):
-        Xtrain=None
-        ytrain=None
+        """ The following function is too similar.
+        """
+        pastDaysToLoad = 5 # this is shady
+        trainStartDate = self.currentTime - timedelta(days=1)
+        df = createTrainingDataSet(self.stock, trainStarts, self.currentTime):
+        trainStartsSample = -self.requiredTrainingSamples - self.requiredEvaluationSamples
+        evaluationStartsSample = - self.requiredEvaluationSamples
+        Xtrain=df[trainStartsSample:evaluationStartsSample].copy()
+        ytrain=Xtrain.pop('target')
         return Xtrain, ytrain
 
     def getEvaluationDataSet(self):
-        Xeval=None
-        yeval=None
+        """ Too similar to the previous one.
+        """
+        pastDaysToLoad = 5 # this is shady
+        trainStartDate = self.currentTime - timedelta(days=1)
+        df = createTrainingDataSet(self.stock, trainStarts, self.currentTime):
+        trainStartsSample = -self.requiredTrainingSamples - self.requiredEvaluationSamples
+        evaluationStartsSample = - self.requiredEvaluationSamples
+        Xeval=df[evaluationStartsSample:].copy()
+        yeval=Xeval.pop('target')
         return Xeval, yeval
 
 
     def generateBuyOrder(self):
-        buyOrder =  {'orderType': 'BUY', 
-                'stock': self.stock,  
-                'generatedAt': datetime.now(), 
-                'expiresAt': datetime(2040,1,1),
-                'precision': 0.666,
-                'recall': 0.222}
+        buyOrder =  {
+            'orderType': 'BUY', 
+            'stock': self.stock,  
+            'generatedAt': datetime.now(), 
+            'expiresAt': self.currentTime + timedelta(minute=1)
+        }
         return buyOrder
 
 
     def generateNullOrder(self):
-        buyOrder =  {'orderType': 'NULL', 
-                'stock': self.stock,  
-                'generatedAt': datetime.now(), 
-                'expiresAt': datetime(2040,1,1),
-                'precision': 0.666,
-                'recall': 0.222}
+        buyOrder =  {
+            'orderType': 'NULL', 
+            'stock': self.stock,  
+            'generatedAt': datetime.now(), 
+            'expiresAt': self.currentTime + timedelta(minute=1)
+        }
         return buyOrder
 
 
@@ -147,21 +166,16 @@ def generatePipeline(classifier):
         ('timeSeriesToFeatures', FunctionTransformer(timeSeriesToFeatures)),
         ('createtimefeatures', FunctionTransformer(createTimeFeatures)),
         ('fillemptyvalues', TransformationWrapper(SimpleImputer(strategy='median'))),
-        #('pca', TransformationWrapper(PCA(n_components=30), colnames=['PC_'+str(i) for i in range(1,31)])),
         ('scaler', TransformationWrapper(MinMaxScaler())),
         ('classifier', classifier)
         
     ])
     return pipeline
 
-
-
-
-
-
-
-#X = np.array([[-1, -1], [-2, -1], [-3, -2], [1, 1], [2, 1], [3, 2]])
-#pca = PCA(n_components=2)
+#('pca', TransformationWrapper(PCA(n_components=30), colnames=['PC_'+str(i) for i in range(1,31)])),
 #('scaletimeseries', FunctionTransformer(timeSeriesScaler)),
+
+
+
 
 

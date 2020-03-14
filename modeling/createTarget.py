@@ -1,7 +1,8 @@
 
 import pandas as pd
-def createTarget(barSeries, memSize=120):
+def createTarget(barSeries, futureEnds):
     """ An overly pesimistic buy-sell scenario
     """
-    d=(barSeries.low.shift(-20)-barSeries.high.shift(-1))
+    assert futureEnds<0, "futurEnds must be a negative integer"
+    d=(barSeries.low.shift(futureEnds)-barSeries.high.shift(-1))
     return (d>0)
