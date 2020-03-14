@@ -21,11 +21,11 @@ from sklearnUtilities.preprocessors import bayesianTransformer
 from sklearnUtilities.preprocessors import createTimeSeriesDiferences
 from sklearnUtilities.preprocessors import FunctionTransformer
 from sklearnUtilities.precisionRecallUtilities import selectThreshold
-from sklearnUtilities.modeling import createTrainingDataSet
+from modeling.createTrainingDataSet import createTrainingDataSet
 
 
 
-class stockModel():
+class StockModel():
     """Wrapper of a single pipeline with its respective thresholds, train datasets,  evaluators, performance
         Requirements:
             * Data is fed to this class minute by minute in chronological order.
@@ -34,7 +34,7 @@ class stockModel():
             * It is unreallistic to assume that the model is going to start the day behaving as it behave by the end of last day.
 
     """
-    def __init__( self, stock, pastStarts, futureEnds, 
+    def __init__( self, stock, pastStarts=20, futureEnds=-20, 
             requiredTrainingSamples= 3000, requiredEvaluationSamples=200, 
             requiredPrecision=0.55, requiredRecall=0.5, requiredCertainty=0.9):
         """ pastStarts: must be positive, number of days in the past used to create features
@@ -48,9 +48,11 @@ class stockModel():
         self.requiredPrecision = requiredPrecision 
         self.requiredRecall = requiredRecall 
         self.requiredCertainty = requiredCertainty
+        self.pastStarts=pastStarts
+        self.futureEnds=futureEnds
 
 
-    def getModelSuggestion(self, currentTime):
+    def getOrder(self, currentTime):
         """ This function should be called every minute
         """
         self.currentTime = currentTime
@@ -70,8 +72,8 @@ class stockModel():
             * We might want to delete the rows with empty values in certain cirtumstances
         """
         pastDaysToLoad = 10 # this is (obviously) shady
-        trainStartDate = self.currentTime - timedelta(days=1)
-        df = createTrainingDataSet(self.stock, trainStarts, self.currentTime):
+        trainStartDate = self.currentTime - timedelta(days=pastDaysToLoad)
+        df = createTrainingDataSet(self.stock, trainStartDate, self.currentTime, self.pastStarts, self.futureEnds)
         trainStartsSample = -self.requiredTrainingSamples - self.requiredEvaluationSamples
         evaluationStartsSample = - self.requiredEvaluationSamples
         self.Xtrain=df[trainStartsSample:evaluationStartsSample].copy()
@@ -124,10 +126,10 @@ class stockModel():
             Track empty values on yeval, ytrain ... those are key, I bet.
             Xeval, yeval, Xtrain, ytrain must be exposed even just for debugging purposes.
         """
-        if self.threshold==None:
+        if self.threshold==None: 
             return None
         scores = self.model.predict_proba(self.Xeval)[:,1]
-    	return scores[-1]>self.threshold
+        return scores[-1]>self.threshold
 
 
     def generateBuyOrder(self):
