@@ -34,8 +34,13 @@ class stockModel():
             * It is unreallistic to assume that the model is going to start the day behaving as it behave by the end of last day.
 
     """
-    def __init__(self, stock, requiredTrainingSamples= 3000, requiredEvaluationSamples=200, 
-    				   requiredPrecision=0.55, requiredRecall=0.5, requiredCertainty=0.9):
+    def __init__( self, stock, pastStarts, futureEnds, 
+            requiredTrainingSamples= 3000, requiredEvaluationSamples=200, 
+            requiredPrecision=0.55, requiredRecall=0.5, requiredCertainty=0.9):
+        """ pastStarts: must be positive, number of days in the past used to create features
+            futureEnds: must be negative, number of days in the future that we are trying to predict
+
+        """
 
         self.stock = stock
         self.requiredTrainingSamples = requiredTrainingSamples
@@ -49,19 +54,36 @@ class stockModel():
         """ This function should be called every minute
         """
         self.currentTime = currentTime
+        self.gatherTrainEvalDataSets()
         self.threshold = self.getModelThreshold()
-        if self.modelRequiresTraining(): self.train()
-        modelSuggestsToBuy = self.threshold!=None and self.thresholdedOutput()==True
-        order=self.generateBuyOrder() if modelSuggestsToBuy else self.generateNullOrder()
+        
+        if self.modelRequiresTraining(): 
+            self.train()
+
+        order=self.generateBuyOrder() if self.thresholdedOutput() else self.generateNullOrder()
         return order 
+
+    def gatherTrainEvalDataSets(self):
+        """ 
+            To do:
+            * We might want check the quality of the sets we gathered (specially if there are missing values)
+            * We might want to delete the rows with empty values in certain cirtumstances
+        """
+        pastDaysToLoad = 10 # this is (obviously) shady
+        trainStartDate = self.currentTime - timedelta(days=1)
+        df = createTrainingDataSet(self.stock, trainStarts, self.currentTime):
+        trainStartsSample = -self.requiredTrainingSamples - self.requiredEvaluationSamples
+        evaluationStartsSample = - self.requiredEvaluationSamples
+        self.Xtrain=df[trainStartsSample:evaluationStartsSample].copy()
+        self.ytrain=self.Xtrain.pop('target')
+        self.Xeval=df[evaluationStartsSample:].copy()
+        self.yeval=self.Xeval.pop('target')
 
 
     def train(self):
         """ Always picks the model witht he biggest auc, does not care about thresholds
         """
         self.modelDate = self.currentTime
-        Xtrain, ytrain = self.gatherTrainDataSet()
-        Xeval, yeval = self.gatherEvaluationDataSet()
         cv = TimeSeriesSplit(n_splits=2)
         classifiers = [
             BernoulliNB(), 
@@ -71,8 +93,8 @@ class stockModel():
         ]
 
         pipelines = [generatePipeline(clf) for clf in classifiers]
-        for p in pipelines: pl.fit(Xtrain, ytrain)
-        areasUnderCurves = [roc_auc_score(yeval, p.predict_proba(Xeval)[:,1]) for p in pipelines]
+        for p in pipelines: pl.fit(self.Xtrain, self.ytrain)
+        areasUnderCurves = [roc_auc_score(yeval, p.predict_proba(self.Xeval)[:,1]) for p in pipelines]
         self.model = pipelines[np.argmax(areasUnderCurves)]
 
 
@@ -88,43 +110,24 @@ class stockModel():
 
     def getModelThreshold(self):
         """ Returns None if its not possible to satisfy the requirements
+            Somehow this piece of the puzzle does not feel entirely right.
+            This cannot be right, very careful!!
+            Track empty values on yeval, ytrain ... those are key, I bet.
         """
-        Xeval, yeval = self.gatherEvaluationDataSet()
-        scores = self.model.predict_proba(Xeval)[:,1]
-        p,r,threshold,a = selectThreshold(y, scores, self.requiredPrecision, self.requiredRecall, self.requiredCertainty)
+        scores = self.model.predict_proba(self.Xeval)[:,1]
+        p,r,threshold,a = selectThreshold(self.yeval, scores, self.requiredPrecision, self.requiredRecall, self.requiredCertainty)
         return threshold
 
     def thresholdedOutput(self):
         """ Somehow this piece of the puzzle does not feel entirely right.
             This cannot be right, very careful!!
+            Track empty values on yeval, ytrain ... those are key, I bet.
+            Xeval, yeval, Xtrain, ytrain must be exposed even just for debugging purposes.
         """
-
-
-    	return 
-
-    def getTrainDataSet(self):
-        """ The following function is too similar.
-        """
-        pastDaysToLoad = 5 # this is shady
-        trainStartDate = self.currentTime - timedelta(days=1)
-        df = createTrainingDataSet(self.stock, trainStarts, self.currentTime):
-        trainStartsSample = -self.requiredTrainingSamples - self.requiredEvaluationSamples
-        evaluationStartsSample = - self.requiredEvaluationSamples
-        Xtrain=df[trainStartsSample:evaluationStartsSample].copy()
-        ytrain=Xtrain.pop('target')
-        return Xtrain, ytrain
-
-    def getEvaluationDataSet(self):
-        """ Too similar to the previous one.
-        """
-        pastDaysToLoad = 5 # this is shady
-        trainStartDate = self.currentTime - timedelta(days=1)
-        df = createTrainingDataSet(self.stock, trainStarts, self.currentTime):
-        trainStartsSample = -self.requiredTrainingSamples - self.requiredEvaluationSamples
-        evaluationStartsSample = - self.requiredEvaluationSamples
-        Xeval=df[evaluationStartsSample:].copy()
-        yeval=Xeval.pop('target')
-        return Xeval, yeval
+        if self.threshold==None:
+            return None
+        scores = self.model.predict_proba(self.Xeval)[:,1]
+    	return scores[-1]>self.threshold
 
 
     def generateBuyOrder(self):
