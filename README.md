@@ -1,6 +1,17 @@
+
+March 21:
+============================================
+I am worried about the code being overly complicated for no reason. Need to stop procrastinating and doit asap. Some notes about:
+* StockModel must use only one model (ridge regression)
+* StockModel must use only one test-train split.
+* Stock model must NOT threshold the output of the pipeline
+* MoneyManager must deal with the thresholding
+* MoneyManager must decide if a model is working or not and take action: buy/sell/do-nothing/re-train.
+
+
 March 12:
 ============================================
-I am blending many
+I am blending many things, some progress
 
 
 March 4:
