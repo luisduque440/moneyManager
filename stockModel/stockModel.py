@@ -12,7 +12,6 @@ class stockModel():
         """ pastStarts: must be positive, number of days in the past used to create features
             futureEnds: must be negative, number of days in the future that we are trying to predict
         """
-        
         self.stock = stock
         self.trainSamples = trainSamples
         self.pastStarts=pastStarts
@@ -21,7 +20,7 @@ class stockModel():
 
 
     def evaluate(self, currentTime): # needs change, seriously.
-        """ This function should be called every minute ...
+        """ Method to be called every minute.. NEEDS WORK !!!
         """
         pastDaysToLoad = 10 # this is (obviously) shady, some duplicated code !.
         trainStartDate = currentTime - timedelta(days=pastDaysToLoad)
@@ -31,7 +30,7 @@ class stockModel():
         return lastScore
 
     def gatherTrainDataSet(self, currentTime):
-        """ Document asap
+        """ Document asap. NEEDS WORK !!!
         """
         pastDaysToLoad = 10 # this is (obviously) shady
         trainStartDate = currentTime - timedelta(days=pastDaysToLoad)
