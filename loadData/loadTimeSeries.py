@@ -21,26 +21,26 @@ def loadTimeSeriesCache():
         timeSeriesCache[stock]=df.copy()
     return timeSeriesCache
 
-def loadTimeSeries(stock, startTime, endTime):
+def loadTimeSeries(stock, numSamples, endTime):
     """ Document asap
     """
     global timeSeriesCache
     df = timeSeriesCache[stock]
-    df = df[(df.date>=startTime) & (df.date<endTime)].copy()
+    df = df[(df.date<endTime)][-numSamples:].copy()
     return df
 
-def loadConsolidatedPrice(startTime, endTime, stockList=None):
+def loadConsolidatedPrice(numSamples, endTime, stockList=None):
     """ Document asap
     """
     stockList = getListOfAvailableStocks() if stockList==None else stockList
-    consolidatedTimeSeries = {S: loadTimeSeries(S, startTime, endTime).consolidated for S in stockList}
+    consolidatedTimeSeries = {S: loadTimeSeries(S, numSamples, endTime).consolidated for S in stockList}
     return consolidatedTimeSeries
 
-def loadIncreaseTimeSeries(startTime, endTime, stockList=None):
+def loadIncreaseTimeSeries(numSamples, endTime, stockList=None):
     """ Document asap
     """
     stockList = getListOfAvailableStocks() if stockList==None else stockList
-    availablePrices = loadConsolidatedPrice(startTime, endTime, stockList)
+    availablePrices = loadConsolidatedPrice(numSamples, endTime, stockList)
     return {S: (1+availablePrices[S].pct_change()).fillna(1) for S in availablePrices}
 
 def getListOfAvailableStocks():
