@@ -4,16 +4,26 @@ from datetime import datetime
 from loadData.loadTimeSeries import loadTimeSeries
 from modeling.createTarget import createTarget
 
-def createTrainingDataSet(stock1, startDay, endDay, pastStarts, futureEnds):
+def createTrainingDataSet(stock1, startTime, endTime, pastStarts, futureEnds):
     """ start documenting this 
     """
     assert pastStarts>0, 'pastStart must be positive'
     assert futureEnds<0, 'futurEnds must be negative'
-    ds = loadTimeSeries(stock1, startDay, endDay)
+    ds = loadTimeSeries(stock1, startTime, endTime)
     ds['target'] = createTarget(ds, futureEnds)
     columnsToPivot = list(ds.columns)
     columnsToPivot.remove('target')
     df = pivotWindow(ds, pastStarts, -1, columnsToPivot)
+    return df
+
+
+def createTrainingDataSetAlternative(stock, numSamples, endTime, pastStarts, futureEnds):
+    """ start documenting this, this might replace the previous method?
+    """
+    assert pastStarts>0, 'pastStart must be positive'
+    assert futureEnds<0, 'futurEnds must be negative'
+    df = pd.DataFrame()
+
     return df
 
 

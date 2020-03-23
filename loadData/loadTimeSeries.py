@@ -4,34 +4,43 @@ from os.path import isfile, join
 from datetime import datetime
 
 dataPath = '/Users/lduque/Desktop/myProjects/moneyManager/loadData/data/quantopian/minuteIntraday/'
+timeSeriesCache = loadTimeSeriesCache()
 
-
-def loadTimeSeries(stock, startDay, endDay):
-    """ this should be better called loadCandleData(?)
+def loadTimeSeriesCache():
+    """ Document asap
     """
-    filename = stock+'.csv'
-    df = pd.read_csv(dataPath+filename).drop(columns=['symbol'])
-    df['date']= pd.to_datetime(df.date, infer_datetime_format=True) 
-    df = df[(df.date>=startDay) & (df.date<endDay)].copy()
-    df = df.set_index('date')
-    df.columns = ['open','high','low','close','volume']
-    
-    # (the following does not belong here !!!!!!)
-    df['consolidated']=df.drop(columns='volume').mean(axis=1) 
+    stockList = getListOfAvailableStocks()
+    timeSeriesCache = {}
+    for stock in stockList: 
+        filename = stock+'.csv'
+        df = pd.read_csv(dataPath+filename).drop(columns=['symbol'])
+        df['date']= pd.to_datetime(df.date, infer_datetime_format=True) 
+        df = df.set_index('date')
+        df.columns = ['open','high','low','close','volume']    
+        df['consolidated']=df.drop(columns='volume').mean(axis=1) 
+        timeSeriesCache[stock]=df.copy()
+    return timeSeriesCache
+
+def loadTimeSeries(stock, startTime, endTime):
+    """ Document asap
+    """
+    global timeSeriesCache
+    df = timeSeriesCache[stock]
+    df = df[(df.date>=startTime) & (df.date<endTime)].copy()
     return df
 
-def loadPriceTimeSeries(startDay, endDay, stockList=None):
+def loadConsolidatedPrice(startTime, endTime, stockList=None):
     """ Document asap
     """
     stockList = getListOfAvailableStocks() if stockList==None else stockList
-    fullTimeSeries = {S: loadTimeSeries(S, startDay, endDay).consolidated for S in stockList}
-    return fullTimeSeries
+    consolidatedTimeSeries = {S: loadTimeSeries(S, startTime, endTime).consolidated for S in stockList}
+    return consolidatedTimeSeries
 
-def loadIncreaseTimeSeries(startDay, endDay, stockList=None):
+def loadIncreaseTimeSeries(startTime, endTime, stockList=None):
     """ Document asap
     """
     stockList = getListOfAvailableStocks() if stockList==None else stockList
-    availablePrices = loadPriceTimeSeries(startDay, endDay, stockList)
+    availablePrices = loadConsolidatedPrice(startTime, endTime, stockList)
     return {S: (1+availablePrices[S].pct_change()).fillna(1) for S in availablePrices}
 
 def getListOfAvailableStocks():

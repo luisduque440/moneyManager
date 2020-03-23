@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from stockModel.generatePipeline import generateLinearPipeline
+from stockModel.createTrainingDataSet import createTrainingDataSet
 
 class stockModel():
     """Wrapper of a single pipeline with its respective thresholds, train datasets,  evaluators, performance
@@ -17,7 +18,6 @@ class stockModel():
         self.pastStarts=pastStarts
         self.futureEnds=futureEnds
         self.pipeline = generateLinearPipeline()
-
 
     def evaluate(self, currentTime): # needs change, seriously.
         """ Method to be called every minute.. NEEDS WORK !!!
