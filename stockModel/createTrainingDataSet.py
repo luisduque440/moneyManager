@@ -2,14 +2,14 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from loadData.loadTimeSeries import loadTimeSeries
-from modeling.createTarget import createTarget
+from stockModel.createTarget import createTarget
 
-def createTrainingDataSet(stock1, numSamples, endTime, pastStarts, futureEnds):
+def createTrainingDataSet(stock, numSamples, endTime, pastStarts, futureEnds):
     """ start documenting this 
     """
     assert pastStarts>0, 'pastStart must be positive'
     assert futureEnds<0, 'futurEnds must be negative'
-    ds = loadTimeSeries(stock1, numSamples, endTime)
+    ds = loadTimeSeries(stock, numSamples, endTime)
     ds['target'] = createTarget(ds, futureEnds)
     columnsToPivot = list(ds.columns)
     columnsToPivot.remove('target')

@@ -4,7 +4,6 @@ from os.path import isfile, join
 from datetime import datetime
 
 dataPath = '/Users/lduque/Desktop/myProjects/moneyManager/loadData/data/quantopian/minuteIntraday/'
-timeSeriesCache = loadTimeSeriesCache()
 
 def loadTimeSeriesCache():
     """ Document asap
@@ -21,12 +20,19 @@ def loadTimeSeriesCache():
         timeSeriesCache[stock]=df.copy()
     return timeSeriesCache
 
+def getListOfAvailableStocks():
+    """ Document asap
+    """
+    return [f.split('.')[0] for f in listdir(dataPath) if isfile(join(dataPath, f))]
+
+
+timeSeriesCache = loadTimeSeriesCache()
 def loadTimeSeries(stock, numSamples, endTime):
     """ Document asap
     """
     global timeSeriesCache
     df = timeSeriesCache[stock]
-    df = df[(df.date<endTime)][-numSamples:].copy()
+    df = df[(df.index<endTime)][-numSamples:].copy()
     return df
 
 def loadConsolidatedPrice(numSamples, endTime, stockList=None):
@@ -43,7 +49,8 @@ def loadIncreaseTimeSeries(numSamples, endTime, stockList=None):
     availablePrices = loadConsolidatedPrice(numSamples, endTime, stockList)
     return {S: (1+availablePrices[S].pct_change()).fillna(1) for S in availablePrices}
 
-def getListOfAvailableStocks():
+
+def getAvailableMarketMinutes():
     """ Document asap
     """
-    return [f.split('.')[0] for f in listdir(dataPath) if isfile(join(dataPath, f))]
+    return [s for s in timeSeriesCache['GS'].index]

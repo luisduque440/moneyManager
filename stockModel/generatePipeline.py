@@ -1,3 +1,4 @@
+import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
@@ -24,7 +25,7 @@ def generateLinearPipeline():
     """ document.
     """
     cv = TimeSeriesSplit(n_splits=2)
-    classifier = LogisticRegressionCV(penalty='l2', Cs = 10**np.linspace(-5,0,50), cv=cv, random_state=0, scoring='auc')
+    classifier = LogisticRegressionCV(penalty='l2', Cs = 10**np.linspace(-5,0,50), cv=cv, random_state=0, scoring='roc_auc')
     linearPipeline = generatePipeline(classifier)
     return linearPipeline
 

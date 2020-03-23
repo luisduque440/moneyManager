@@ -37,6 +37,7 @@ def averageAlpha(ytrue, yScores, requiredPrecision):
 
 ##   careful, the order of these parameters changed, requiredRecall not implemented
 ##  The following function MUST be refactored to ONLY return the threshold?
+## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! VERY CAREFUL (!!!!!)
 def selectThreshold(y, scores, requiredPrecision, requiredRecall, requiredCertainty):
 	"""
 		returns 
