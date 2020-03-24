@@ -23,9 +23,9 @@ class stockModel():
     def evaluate(self, currentTime):
         """ Method to be called every minute
         """
-        df = createTrainingDataSet(self.stock, self.pastStarts, currentTime, self.pastStarts, self.futureEnds)
-        df=df.drop(columns='target')
-        df = df[-1:]
+        df = createTrainingDataSet(self.stock, self.pastStarts+1, currentTime, self.pastStarts, self.futureEnds)
+        X=df.drop(columns='target')[-1:]
+        self.X = X.copy()   # for debugging
         return self.pipeline.predict_proba(X)[:,1][0] 
 
     def train(self, currentTime):
@@ -36,13 +36,15 @@ class stockModel():
 
 
     def gatherTrainDataSet(self, currentTime):
-        """ Document asap. NEEDS WORK !!!
+        """ Document asap.
         """
-        df = createTrainingDataSet(self.stock, self.trainSize, currentTime, self.pastStarts, self.futureEnds)
-        self.df = df.copy() # just for debugging
-        Xtrain = df.copy()
-        ytrain = Xtrain.pop('target') ### this target MUST have np.nan, and it does not have it.
-        return Xtrain, ytrain
+        numSamples = self.trainSize+self.pastStarts-self.futureEnds
+        df = createTrainingDataSet(self.stock, numSamples, currentTime, self.pastStarts, self.futureEnds)
+        df = df[self.pastStarts: self.futureEnds]
+        self.df = df.copy()    # for debugging
+        X = df.copy()
+        y = X.pop('target').apply(bool)
+        return X, y
 
 
 

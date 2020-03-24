@@ -27,7 +27,7 @@ class moneyManager():
 		self.previousScores = {s: [] for s in stocks}
 		self.suggestions = [] 
 
-	def updateTime(currentTime):
+	def updateTime(self, currentTime):
 		""" Piece of code tha needs to run every minute, maybe change the time
 		"""
 		self.updateThresholds(currentTime)
@@ -70,11 +70,12 @@ class moneyManager():
 		latestSuggestions = []
 		for s in self.stocks:
 			output = self.models[s].evaluate(currentTime)
-			self.previousScores[s].append((currentTime, modelOutput))
+			self.previousScores[s].append((currentTime, output))
 
 			if len(self.previousScores[s])>self.testSize:
 				self.previousScores[s].pop(0)
 
+			threshold = self.threholds[s]
 			thresholdedOutput = (threshold!=None and output>threshold) 
 			suggestion = ('BUY', s, currentTime) if thresholdedOutput else ('NON', s, currentTime)
 			latestSuggestions.append(suggestion)
@@ -84,7 +85,7 @@ class moneyManager():
 	def updateLowPerformingModels(self, currentTime):
 		""" document asap
 		"""
-		modelRequiresUpdate = lambda s: self.thresholds[s]==None and len(self.modelOutputs[s])>=self.testSize
+		modelRequiresUpdate = lambda s: self.thresholds[s]==None and len(self.previousScores[s])>=self.testSize
 		for s in self.stocks:
 			if modelRequiresUpdate(s):
 				self.updateModel(s, currentTime)
