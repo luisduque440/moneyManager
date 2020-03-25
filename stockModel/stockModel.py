@@ -17,8 +17,7 @@ class stockModel():
         self.stock = stock
         self.trainSize = trainSize
         self.pastStarts=pastStarts
-        self.futureEnds=futureEnds
-        self.pipeline = generateLinearPipeline()
+        self.futureEnds=futureEnds 
 
     def evaluate(self, currentTime):
         """ Method to be called every minute
@@ -32,6 +31,7 @@ class stockModel():
         """ Document asap
         """
         Xtrain, ytrain = self.gatherTrainDataSet(currentTime)
+        self.pipeline = generateLinearPipeline()
         self.pipeline.fit(Xtrain, ytrain)
 
 

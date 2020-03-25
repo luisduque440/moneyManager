@@ -25,7 +25,7 @@ def generateLinearPipeline():
     """ document.
     """
     cv = TimeSeriesSplit(n_splits=2)
-    classifier = LogisticRegressionCV(penalty='l2', Cs = 10**np.linspace(-5,0,50), cv=cv, random_state=0, scoring='roc_auc')
+    classifier = LogisticRegressionCV(penalty='l2', Cs = 10**np.linspace(-5,0,50), cv=cv, random_state=0, scoring='roc_auc', max_iter=1000)
     linearPipeline = generatePipeline(classifier)
     return linearPipeline
 

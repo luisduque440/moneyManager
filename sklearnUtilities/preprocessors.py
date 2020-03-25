@@ -166,6 +166,12 @@ class TransformationWrapper(BaseEstimator, TransformerMixin):
 
     def transform(self, X):
         columns = self.colnames if self.colnames!=None else X.columns
+        print(columns)
+        print(X.columns)
+        print(X)
+        print(self.transformation)
+        print(self.transformation.transform(X))
+        print(self.transformation.transform(X).shape)
         return pd.DataFrame(self.transformation.transform(X), columns = columns, index=X.index)
 
 
