@@ -6,9 +6,9 @@ from sklearnUtilities.precisionRecallUtilities import selectThreshold
 from stockModel.createTrainingDataSet import createTrainingDataSet
 
 class moneyManager():
-	""" * Keeps only one position at the time !!!
+	"""
 		* This class creates the multiple StockModels we need and runs them minute by minute
-		* Uses the market simulator to see if we are performing good enough.
+		* To do: Uses the market simulator to see if we are performing good enough.
 	"""
 	def __init__(self, stocks, pastStarts=20, futureEnds=-20, trainSize=1200, 
 		testSize=120, requiredPrecision=0.55, requiredRecall=0.05, requiredCertainty=0.9):
@@ -44,7 +44,7 @@ class moneyManager():
 	def updateModel(self, stock, currentTime):
 		""" Document asap
 		"""
-		print(stock)
+		print('training model for ', stock)
 		self.models[stock].train(currentTime)
 		self.testSets[stock]=[]
 
@@ -81,7 +81,7 @@ class moneyManager():
 
 			threshold = self.thresholds[s]
 			thresholdedOutput = (threshold!=None and output>threshold) 
-			suggestion = ('BUY', s, currentTime) if thresholdedOutput else ('NON', s, currentTime)
+			suggestion = ('buyAndKeep20mins', s, currentTime) if thresholdedOutput else ('none', s, currentTime)
 			latestSuggestions.append(suggestion)
 		return latestSuggestions
 

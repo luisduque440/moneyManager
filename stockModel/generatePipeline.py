@@ -34,11 +34,9 @@ def generatePipeline(classifier):
 	
     """ start documenting this 
     To do:
-        0) The name of this should change: generateTimeSeriesPipeline()
-        1) classifier could be a parameter, columns to use could be parameters
-        2) Include differences as features too.
-        3) Bayes-encode the time features
-        4) How should the exogenous features feed this pipeline?
+        0) Temporarily we are not going to fill empty values: I want the pipeline to break in that case to debug more thoroughly
+        1) Bayes-encode the time features, maybe?
+        2) How should the exogenous features feed this pipeline?
     """
     pipeline = Pipeline([
         ('selectcolumns', ColumnSelector()), 

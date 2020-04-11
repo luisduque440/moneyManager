@@ -1,14 +1,10 @@
 import pandas as pd
 import random
-import numpy as np
-from datetime import datetime
 from loadData.loadTimeSeries import loadTimeSeries
-from loadData.loadTimeSeries import getListOfAvailableStocks
-from loadData.loadTimeSeries import loadPriceTimeSeries
 from marketSimulator.marketSimulator import marketSimulator
 from marketSimulator.marketSimulator import getPercentageOfIncreases
 
-def strategySimulator(precision, recall, stocks, startDay, endDay, createTarget, numSimulations):
+def strategySimulator(precision, recall, stocks, numSamples, endDay, createTarget, numSimulations):
     """ Document this asap
     """
     outcomes = []
@@ -16,17 +12,17 @@ def strategySimulator(precision, recall, stocks, startDay, endDay, createTarget,
     positiveIncreasesPct = [] 
     for i in range(numSimulations):
         print('.', end ='')
-        strategy =simulateSingleStrategy(precision, recall, stocks, startDay, endDay, createTarget)
+        strategy =simulateSingleStrategy(precision, recall, stocks, numSamples, endDay, createTarget)
         outcomes.append(marketSimulator(strategy).values[-1])
         numMovements.append(countPositionChanges(strategy))
         positiveIncreasesPct.append(getPercentageOfIncreases(strategy))
     return outcomes, numMovements, positiveIncreasesPct
     
 
-def simulateSingleStrategy(precision, recall, stocks, startDay, endDay, createTarget):
+def simulateSingleStrategy(precision, recall, stocks, numSamples, endDay, createTarget):
     """ Notice that modelSuggestions are build from the modelOutcomes, they might be slightly different.
     """
-    modelOutcomes = {s: simulateModelOutcome(precision, recall, s, startDay, endDay, createTarget) for s in stocks}
+    modelOutcomes = {s: simulateModelOutcome(precision, recall, s, numSamples, endDay, createTarget) for s in stocks}
     modelSuggestions = {s : modelOutcomes[s].shift(1).fillna(False) for s in modelOutcomes}
     possibleMoves = getPossibleMoves(modelSuggestions)
     strategy= possibleMoves.apply(lambda x: random.choice(x) if len(x)>0 else None)
@@ -34,10 +30,11 @@ def simulateSingleStrategy(precision, recall, stocks, startDay, endDay, createTa
     strategy = keepPositionsForAtLeastNMins(strategy, N=20)
     return strategy
 
-def simulateModelOutcome(precision, recall, stock, startDay, endDay, createTarget):
+
+def simulateModelOutcome(precision, recall, stock, numSamples, endDay, createTarget):
     """ Simulate the outcome of a single model.
     """
-    barSeries = loadTimeSeries(stock, startDay, endDay)
+    barSeries = loadTimeSeries(stock, numSamples, endDay)
     marketMinutes = barSeries.index
     idealPredictions = createTarget(barSeries)
     totalPositives = idealPredictions.value_counts()[True]
@@ -75,8 +72,7 @@ def getPossibleMoves(modelSuggestions):
 def keepPositionsForAtLeastNMins(strategy, N=20):
     """ Modifies a strategy so that each position is kept for at least N minutes
     """
-    #strategy.values[i] = strategy.values[i-1] if strategy.values[i]==None else strategy.values[i]
-    counter = 1 
+    counter = 1
     for i in range(1, len(strategy)):
         if strategy.values[i]==None:
             strategy.values[i]=strategy.values[i-1]
@@ -101,9 +97,9 @@ def countPositionChanges(strategy):
     return counter
 
 
-def getGainOfOnlyOneStockStrategy(stock, startDay, endDay):
+def getGainOfOnlyOneStockStrategy(stock, numSamples, endDay):
     """ Gain==ROI (?)
     """
-    marketTimes = loadTimeSeries(stock, startDay, endDay).index
+    marketTimes = loadTimeSeries(stock, numSamples, endDay).index
     onlyOne = pd.Series([stock]*len(marketTimes), index=marketTimes)
     return marketSimulator(onlyOne, initialAmount=1)[-1]

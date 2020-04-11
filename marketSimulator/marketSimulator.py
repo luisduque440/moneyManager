@@ -1,5 +1,3 @@
-import pandas as pd 
-from datetime import datetime
 from loadData.loadTimeSeries import loadIncreaseTimeSeries
 
 stockSeriesIncreases = loadIncreaseTimeSeries()

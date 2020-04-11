@@ -1,9 +1,5 @@
-import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
 from stockModel.generatePipeline import generateLinearPipeline
 from stockModel.createTrainingDataSet import createTrainingDataSet
-from loadData.loadTimeSeries import loadTimeSeries
 
 class stockModel():
     """Wrapper of a single pipeline with its respective thresholds, train datasets,  evaluators, performance

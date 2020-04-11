@@ -1,9 +1,9 @@
 import pandas as pd
 from os import listdir
 from os.path import isfile, join
-from datetime import datetime
 
 dataPath = '/Users/lduque/Desktop/myProjects/moneyManager/loadData/data/quantopian/minuteIntraday/'
+
 
 def loadTimeSeriesCache():
     """ Document asap
@@ -27,22 +27,38 @@ def getListOfAvailableStocks():
 
 
 timeSeriesCache = loadTimeSeriesCache()
-def loadTimeSeries(stock, numSamples, endTime):
+def loadTimeSeries(stock, numSamples=None, endTime=None):
     """ Document asap
     """
     global timeSeriesCache
     df = timeSeriesCache[stock]
-    df = df[(df.index<endTime)][-numSamples:].copy()
-    return df
+    df = df[(df.index<endTime)][-numSamples:].copy() if (numSamples!=None and endTime!=None) else df
+    return df 
 
-def loadConsolidatedPrice(numSamples, endTime, stockList=None):
+
+
+def countEmptyValuesInAvailableData():
+    """ (probably not being used)
+    """
+    stocks = getListOfAvailableStocks()
+    emptyInfo = []
+    for s in stocks:
+        df = loadTimeSeries(s)
+        emptyCount = df.isna().sum()
+        emptyInfo.append(emptyCount)
+    dg = pd.concat(emptyInfo, axis=1)
+    dg.columns=stocks
+    return dg
+
+
+def loadConsolidatedPrice(numSamples=None, endTime=None, stockList=None):
     """ Document asap
     """
     stockList = getListOfAvailableStocks() if stockList==None else stockList
     consolidatedTimeSeries = {S: loadTimeSeries(S, numSamples, endTime).consolidated for S in stockList}
     return consolidatedTimeSeries
 
-def loadIncreaseTimeSeries(numSamples, endTime, stockList=None):
+def loadIncreaseTimeSeries(numSamples=None, endTime=None, stockList=None):
     """ Document asap
     """
     stockList = getListOfAvailableStocks() if stockList==None else stockList
