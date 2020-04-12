@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-from datetime import datetime
 from loadData.loadTimeSeries import loadTimeSeries
 from stockModel.createTarget import createTarget
 

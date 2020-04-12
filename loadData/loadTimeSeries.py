@@ -4,7 +4,6 @@ from os.path import isfile, join
 
 dataPath = '/Users/lduque/Desktop/myProjects/moneyManager/loadData/data/quantopian/minuteIntraday/'
 
-
 def loadTimeSeriesCache():
     """ Document asap
     """
