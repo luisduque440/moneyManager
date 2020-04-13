@@ -1,18 +1,47 @@
 import pandas as pd
+import numpy as np
+import math as mt
 from loadData.loadTimeSeries import loadTimeSeries
 from stockModel.createTarget import createTarget
+
 
 def createTrainingDataSet(stock, numSamples, endTime, pastStarts, futureEnds):
     """ start documenting this 
     """
+    X = createFeatures(stock, numSamples, endTime, pastStarts)
+    y = createTarget(stock, numSamples, endTime, futureEnds)
+    return X, y
+
+
+def createFeatures(stock, numSamples, endTime, pastStarts):
+    """ start documenting this
+    """
     assert pastStarts>0, 'pastStart must be positive'
+    ds = loadTimeSeries(stock, numSamples, endTime)
+    df = pivotWindow(ds, pastStarts, -1, ds.columns)
+    return df
+
+
+def createTarget(stock, numSamples, endTime, futureEnds):
+    """ start documenting this
+    """
     assert futureEnds<0, 'futurEnds must be negative'
     ds = loadTimeSeries(stock, numSamples, endTime)
-    ds['target'] = createTarget(ds, futureEnds)
-    columnsToPivot = list(ds.columns)
-    columnsToPivot.remove('target')
-    df = pivotWindow(ds, pastStarts, -1, columnsToPivot)
-    return df
+    dt = createTargetFromTimeSeries(ds, futureEnds)
+    return dt
+
+
+def createTargetFromTimeSeries(timeSeries, futureEnds):
+    """ An overly pesimistic buy-sell scenario
+    Note: it is very dangerous to have a default value for future ends
+    """
+    assert futureEnds < 0, "futureEnds must be a negative integer"
+    df = pd.DataFrame(
+        {'future': timeSeries.low.shift(futureEnds), 'nextMin': timeSeries.high.shift(-1)},
+        index=barSeries.index
+    )
+    target = df.apply(lambda x: np.nan if (mt.isnan(x.future) or mt.isnan(x.nextMin)) else (x.future > x.nextMin), axis=1)
+    return target
 
 
 def pivotWindow(ds, start, end, columnsToPivot):

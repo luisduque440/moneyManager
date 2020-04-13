@@ -3,7 +3,7 @@ import numpy as np
 import math as mt
 
 
-def createTarget(barSeries, futureEnds=-20):
+def createTargetOLD(barSeries, futureEnds=-20):
     """ An overly pesimistic buy-sell scenario
     Note: it is very dangerous to have a default value for future ends
     """

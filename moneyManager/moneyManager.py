@@ -7,8 +7,10 @@ from stockModel.createTrainingDataSet import createTrainingDataSet
 
 class moneyManager():
 	"""
-		* This class creates the multiple StockModels we need and runs them minute by minute
-		* To do: Uses the market simulator to see if we are performing good enough.
+		* Creates multiple stockModels and updates them minute by minute.
+		* StockModels return a score every minute
+		* The method updateThresholds decides if there is a threshold that makes the StockModel reliable
+		* If there is a valid threshold
 	"""
 	def __init__(self, stocks, pastStarts=20, futureEnds=-20, trainSize=1200, 
 		testSize=120, requiredPrecision=0.55, requiredRecall=0.05, requiredCertainty=0.9):
@@ -27,11 +29,10 @@ class moneyManager():
 		self.testSets = {s: [] for s in stocks}
 		self.suggestions = [] 
 
-	def updateTime(self, currentTime):
+	def update(self, currentTime):
 		""" Piece of code tha needs to run every minute
 		"""
-		latestSuggestions = self.getLatestSuggestions(currentTime)
-		self.suggestions += latestSuggestions
+		self.suggestions += self.getLatestSuggestions(currentTime)
 		self.updateThresholds(currentTime)
 		self.updateLowPerformingModels(currentTime)
 
@@ -45,7 +46,7 @@ class moneyManager():
 		""" Document asap
 		"""
 		print('training model for ', stock)
-		self.models[stock].train(currentTime)
+		self.models[stock].fit(currentTime)
 		self.testSets[stock]=[]
 
 	def updateThresholds(self, currentTime):
@@ -76,7 +77,7 @@ class moneyManager():
 			if self.testSetIsBig(s):
 				self.testSets[s].pop(0)
 
-			output = self.models[s].evaluate(currentTime)
+			output = self.models[s].predict_proba(currentTime)
 			self.testSets[s].append((currentTime, output))
 
 			threshold = self.thresholds[s]

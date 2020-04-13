@@ -1,10 +1,9 @@
 from stockModel.generatePipeline import generateLinearPipeline
+from stockModel.createTrainingDataSet import createFeatures
 from stockModel.createTrainingDataSet import createTrainingDataSet
 
 class stockModel():
-    """Wrapper of a single pipeline with its respective thresholds, train datasets,  evaluators, performance
-        Requirements:
-            * The method
+    """ Wrapper of a pipeline
     """
     def __init__( self, stock, pastStarts, futureEnds, trainSize):
         """ pastStarts: must be positive, number of days in the past used to create features
@@ -15,32 +14,32 @@ class stockModel():
         self.pastStarts=pastStarts
         self.futureEnds=futureEnds 
 
-    def evaluate(self, currentTime):
+    def predict_proba(self, currentTime):
         """ Method to be called every minute
+        To do: if data is not 'reliable', return None
         """
-        df = createTrainingDataSet(self.stock, self.pastStarts+1, currentTime, self.pastStarts, self.futureEnds)
-        X=df.drop(columns='target')[-1:]
-        self.X = X.copy()   # for debugging
-        return self.pipeline.predict_proba(X)[:,1][0] 
+        X = createFeatures(self.stock, self.pastStarts+1, currentTime, self.pastStarts)
+        self.X = X.copy()   #debug
+        return self.pipeline.predict_proba(X)[:,1][0]
 
-    def train(self, currentTime):
+    def fit(self, currentTime):
         """ Document asap
+            There are at least two natural train-test splits to consider. Only considering one for now.
         """
-        Xtrain, ytrain = self.gatherTrainDataSet(currentTime)
+        numSamples = self.trainSize + self.pastStarts - self.futureEnds
+        X, y = createTrainingDataSet(stock, numSamples, currentTime, self.pastStarts, self.futureEnds)
+        X, y = X[self.pastStarts: self.futureEnds], y[self.pastStarts: self.futureEnds].apply(bool)
+        print("stockModel.untested() has not been untested... specifically check that createTrainindDataSet is not lecking data")
         self.pipeline = generateLinearPipeline()
-        self.pipeline.fit(Xtrain, ytrain)
+        self.pipeline.fit(X, y)
 
 
-    def gatherTrainDataSet(self, currentTime):
-        """ Document asap.
+    def modelThresholdWillbeValidInTheNearFuture(self, currentTime):
         """
-        numSamples = self.trainSize+self.pastStarts-self.futureEnds
-        df = createTrainingDataSet(self.stock, numSamples, currentTime, self.pastStarts, self.futureEnds)
-        df = df[self.pastStarts: self.futureEnds]
-        self.df = df.copy()    # for debugging
-        X = df.copy()
-        y = X.pop('target').apply(bool)
-        return X, y
+        A method that checks how good the model works in the future. Only to be run during backtest.
+        Add a warning.
+        """
+        pass
 
 
 

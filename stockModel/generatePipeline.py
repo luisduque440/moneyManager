@@ -1,25 +1,16 @@
 import numpy as np
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.impute import SimpleImputer
-from sklearn.linear_model import LogisticRegression
-from sklearn.decomposition import PCA
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegressionCV
-from sklearn.linear_model import LogisticRegression
-from sklearn.naive_bayes import BernoulliNB
-from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import TimeSeriesSplit
 from sklearnUtilities.preprocessors import ColumnSelector
 from sklearnUtilities.preprocessors import timeSeriesScaler
 from sklearnUtilities.preprocessors import timeSeriesToFeatures 
 from sklearnUtilities.preprocessors import createTimeFeatures 
 from sklearnUtilities.preprocessors import TransformationWrapper
-from sklearnUtilities.preprocessors import BayesianCategoricalEncoder
-from sklearnUtilities.preprocessors import bayesianTransformer
 from sklearnUtilities.preprocessors import createTimeSeriesDiferences
 from sklearnUtilities.preprocessors import FunctionTransformer
-from stockModel.createTrainingDataSet import createTrainingDataSet
-
 
 def generateLinearPipeline():
     """ document.

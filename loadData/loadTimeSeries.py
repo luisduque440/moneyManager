@@ -68,4 +68,4 @@ def loadIncreaseTimeSeries(numSamples=None, endTime=None, stockList=None):
 def getAvailableMarketMinutes():
     """ Document asap
     """
-    return [s for s in timeSeriesCache['GS'].index]
+    return [s for s in timeSeriesCache['CSCO'].index]
