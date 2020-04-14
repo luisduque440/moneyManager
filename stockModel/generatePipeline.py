@@ -22,12 +22,12 @@ def generateLinearPipeline():
 
 
 def generatePipeline(classifier):
-	
     """ start documenting this 
     To do:
         0) Temporarily we are not going to fill empty values: I want the pipeline to break in that case to debug more thoroughly
         1) Bayes-encode the time features, maybe?
         2) How should the exogenous features feed this pipeline?
+        3) Good idea to have a class just to record what is happening and use to do feature selection.
     """
     pipeline = Pipeline([
         ('selectcolumns', ColumnSelector()), 
@@ -38,6 +38,5 @@ def generatePipeline(classifier):
         ('fillemptyvalues', TransformationWrapper(SimpleImputer(strategy='median'))),
         ('scaler', TransformationWrapper(MinMaxScaler())),
         ('classifier', classifier)
-        
     ])
     return pipeline
