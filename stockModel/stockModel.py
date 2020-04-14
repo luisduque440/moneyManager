@@ -2,8 +2,6 @@ from stockModel.generatePipeline import generateLinearPipeline
 from stockModel.createTrainingDataSet import createFeatures
 from stockModel.createTrainingDataSet import createTrainingDataSet
 
-# there should be another class/file just to study this class and experiment with the pipeline.
-
 class stockModel():
     """ Wrapper of a pipeline
     """
