@@ -105,9 +105,8 @@ class moneyManager():
 			correctBuySuggestions[s] = [b for b in buySuggestions[s] if b in idealBuyTimes[s]]
 
 		buySuggestionsCount = sum([len(buySuggestions[s]) for s in stocks])
-		print(buySuggestionsCount)
 		correctBuySuggestionsCount = sum([len(correctBuySuggestions[s]) for s in stocks])
-		print(correctBuySuggestionsCount)
+		print(buySuggestionsCount, correctBuySuggestionsCount)
 
 	def _getBuySuggestions(self):
 		""" document
@@ -124,7 +123,7 @@ class moneyManager():
 		idealBuyTimes = {}
 		for s in self.stocks:
 			ds = loadTimeSeries(s)
-			dB = createTarget(ds)
+			dB = createTarget(ds) ############################# this function has changed
 			idealBuyTimes[s] = set(dB[dB == True].index)
 		return idealBuyTimes
 
