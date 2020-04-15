@@ -18,6 +18,7 @@ def createFeaturesAtCurrentTime(stock, currentTime, pastStarts):
     print('currentTime ', currentTime)
     dt = loadTimeSeries(stock, pastStarts+1, currentTime)
     dt['date']=dt.index
+    print(dt.dtypes)
     print(dt)
     X = _createFeaturesFromTimeSeries(dt, pastStarts)
     print(X)
@@ -30,10 +31,8 @@ def createFeaturesAtCurrentTime(stock, currentTime, pastStarts):
 
 
 
-
-
 def _cleanFeatures(X):
-    correctLen = lambda x: False if (np.isnat(x[-0]) or  np.isnat(x[-1])) else  (x[-1] - x[0]).minutes == len(x) - 1
+    correctLen = lambda x: False if (np.isnat(x[-0], dtype=np.datetime64) or np.isnat(x[-1], dtype=np.datetime64)) else (x[-1] - x[0]).minutes == len(x) - 1
     validRows = X.date.apply(correctLen)
     print('validRows')
     print(validRows)
@@ -41,7 +40,7 @@ def _cleanFeatures(X):
     return X
 
 def _cleanTrainingData(X,y):
-    correctLen = lambda x: False if (np.isnat(x[-0]) or  np.isnat(x[-1])) else  (x[-1] - x[0]).minutes == len(x) - 1
+    correctLen = lambda x: False if (np.isnat(x[-0], dtype=np.datetime64) or np.isnat(x[-1], dtype=np.datetime64)) else  (x[-1] - x[0]).minutes == len(x) - 1
     validRowsX = X.date.apply(correctLen)
     validRowsY = y.date.apply(correctLen)
     validRows= validRowsX & validRowsY
