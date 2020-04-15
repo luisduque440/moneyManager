@@ -1,6 +1,4 @@
 import pandas as pd
-import numpy as np
-import math as mt
 from loadData.loadTimeSeries import loadTimeSeries
 
 def createTrainingDataSet(stock, numSamples, endTime, pastStarts, futureEnds):
@@ -18,11 +16,14 @@ def createFeaturesAtCurrentTime(stock, currentTime, pastStarts):
     """
     dt = loadTimeSeries(stock, pastStarts+1, currentTime)
     dt['date']=dt.index
-    df = _createFeaturesFromTimeSeries(dt, pastStarts)
-    validRows = df.date.apply(lambda x: (x[-1]-x[0]).min == len(x))
-    df = df.loc[validRows]
-    return df if len(df)!=1 else None
+    X = _createFeaturesFromTimeSeries(dt, pastStarts)
+    X = _cleanFeatures(X)
+    return X
 
+def _cleanFeatures(X):
+    validRows = X.date.apply(lambda x: (x[-1]-x[0]).min == len(x))
+    X = X.loc[validRows].copy()
+    return X
 
 def _cleanTrainingData(X,y):
     """
