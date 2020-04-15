@@ -33,4 +33,3 @@ class stockModel():
         self.pipeline = generateLinearPipeline()
         self.X, self.y = X, y
         self.pipeline.fit(X, y)
-
