@@ -32,7 +32,7 @@ def loadTimeSeries(stock, numSamples=None, endTime=None):
     global timeSeriesCache
     df = timeSeriesCache[stock]
     df = df[(df.index<endTime)][-numSamples:].copy() if (numSamples!=None and endTime!=None) else df
-    return df 
+    return df.copy()
 
 
 
