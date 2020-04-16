@@ -1,5 +1,5 @@
 import pandas as pd
-import numpy as np
+from datetime import timedelta
 from loadData.loadTimeSeries import loadTimeSeries
 
 def createTrainingDataSet(stock, numSamples, currentTime, pastStarts, futureEnds):
@@ -15,34 +15,26 @@ def createTrainingDataSet(stock, numSamples, currentTime, pastStarts, futureEnds
 def createFeaturesAtCurrentTime(stock, currentTime, pastStarts):
     """ document
     """
-    print('currentTime ', currentTime)
     dt = loadTimeSeries(stock, pastStarts+1, currentTime)
     dt['date']=dt.index
-    print(dt.dtypes)
-    print(dt)
     X = _createFeaturesFromTimeSeries(dt, pastStarts)
-    print(X)
     X = _cleanFeatures(X)
-    print(X)
-    print('--------------')
     if len(X)!=1: return None
-    if X.date.values[0][-1]!=(currentTime-timedelta(mins=1)): return None
+    if X.date.values[0][-1]!=(currentTime-timedelta(minutes=1)): return None
     return X
 
-
+_hasNulls= lambda x: len([t for t in x if pd.isnull(t)])>0
+_minutes = lambda x: (x[-1] - x[0]).seconds//60
+_correctLen = lambda x: False if _hasNulls(x) else (_minutes(x)== len(x) - 1)
 
 def _cleanFeatures(X):
-    correctLen = lambda x: False if (np.isnat(x[-0], dtype=np.datetime64) or np.isnat(x[-1], dtype=np.datetime64)) else (x[-1] - x[0]).minutes == len(x) - 1
-    validRows = X.date.apply(correctLen)
-    print('validRows')
-    print(validRows)
+    validRows = X.date.apply(_correctLen)
     X = X.loc[validRows].copy()
     return X
 
 def _cleanTrainingData(X,y):
-    correctLen = lambda x: False if (np.isnat(x[-0], dtype=np.datetime64) or np.isnat(x[-1], dtype=np.datetime64)) else  (x[-1] - x[0]).minutes == len(x) - 1
-    validRowsX = X.date.apply(correctLen)
-    validRowsY = y.date.apply(correctLen)
+    validRowsX = X.date.apply(_correctLen)
+    validRowsY = y.date.apply(_correctLen)
     validRows= validRowsX & validRowsY
     X, y = X.loc[validRows], y.loc[validRows]
     return X, y
