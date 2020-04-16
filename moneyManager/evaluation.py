@@ -7,9 +7,9 @@ def evaluateAllSuggestions(suggestionList):
 def evaluateSingleSuggestion(suggestion):
     pass
 
-############################ This methods do not belong here, not at all (!!!!!!)
 def evaluateAvailableSuggestions(self):
-    # check how many of our suggestions were actually correct:
+    """ document
+    """
     buySuggestions = self._getBuySuggestions()
     idealBuyTimes = self._getIdealBuyTimes()
     correctBuySuggestions = {}

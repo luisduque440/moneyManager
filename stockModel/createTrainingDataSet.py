@@ -12,9 +12,6 @@ def createTrainingDataSet(stock, numSamples, currentTime, pastLen, futureLen):
     X = _createFeaturesFromTimeSeries(dt, pastLen)
     y = _createTargetFromTimeSeries(dt, futureLen)
     X, y = _cleanTrainingData(X, y)
-    firstFutureDate = y.date.apply(lambda x: x[0]).values
-    y.index = firstFutureDate
-    X.index = firstFutureDate
     return X, y
 
 def createFeaturesAtCurrentTime(stock, currentTime, pastLen):
@@ -26,8 +23,8 @@ def createFeaturesAtCurrentTime(stock, currentTime, pastLen):
     X = _cleanFeatures(X)
     if len(X)!=1: return None
     lastDateInFeatures = X.date.values[0][-1]
-    if lastDateInFeatures!=(currentTime-timedelta(minutes=1)): return None
-    X.index=[lastDateInFeatures+timedelta(minutes=1)]
+    if lastDateInFeatures!=(currentTime-timedelta(minutes=1)):
+        return None
     return X
 
 _hasNulls= lambda x: len([t for t in x if pd.isnull(t)])>0
@@ -47,16 +44,20 @@ def _cleanTrainingData(X,y):
     return X, y
 
 def _createFeaturesFromTimeSeries(dt, pastLen):
-    df = _pivotWindow(dt, pastLen-1, -1, dt.columns)
-    return df
+    X = _pivotWindow(dt, pastLen-1, -1, dt.columns)
+    lastFeatureDatePlusOneMinute = X.date.apply(lambda x: x[-1]).apply(lambda x:x+timedelta(minutes=1))
+    X.index = lastFeatureDatePlusOneMinute
+    return X
 
 def _createTargetFromTimeSeries(dt, futureLen):
     df = _pivotWindow(dt, -1, -futureLen-1, dt.columns)
     nextMinuteValue =  df.consolidated.apply(lambda x:x[0])
     futureValue = df.consolidated.apply(lambda x:x[-1])
     t = (futureValue-nextMinuteValue)>0
-    dtarget = pd.DataFrame({'target': t, 'date': df.date})
-    return dtarget
+    y = pd.DataFrame({'target': t, 'date': df.date})
+    firstFutureDate = y.date.apply(lambda x: x[0]).values
+    y.index = firstFutureDate
+    return y
 
 
 def _pivotWindow(ds, start, end, columnsToPivot):
