@@ -2,25 +2,32 @@ import pandas as pd
 from datetime import timedelta
 from loadData.loadTimeSeries import loadTimeSeries
 
-def createTrainingDataSet(stock, numSamples, currentTime, pastStarts, futureEnds):
+def createTrainingDataSet(stock, numSamples, currentTime, pastLen, futureLen):
     """ document
     """
+    assert pastLen>0, 'pastLen must be positive'
+    assert futureLen>0, 'futureLen must be positive'
     dt = loadTimeSeries(stock, numSamples, currentTime)
     dt['date']=dt.index
-    X = _createFeaturesFromTimeSeries(dt, pastStarts)
-    y = _createTargetFromTimeSeries(dt, futureEnds)
+    X = _createFeaturesFromTimeSeries(dt, pastLen)
+    y = _createTargetFromTimeSeries(dt, futureLen)
     X, y = _cleanTrainingData(X, y)
+    firstFutureDate = y.date.apply(lambda x: x[0]).values
+    y.index = firstFutureDate
+    X.index = firstFutureDate
     return X, y
 
-def createFeaturesAtCurrentTime(stock, currentTime, pastStarts):
+def createFeaturesAtCurrentTime(stock, currentTime, pastLen):
     """ document
     """
-    dt = loadTimeSeries(stock, pastStarts+1, currentTime)
+    dt = loadTimeSeries(stock, pastLen, currentTime)
     dt['date']=dt.index
-    X = _createFeaturesFromTimeSeries(dt, pastStarts)
+    X = _createFeaturesFromTimeSeries(dt, pastLen)
     X = _cleanFeatures(X)
     if len(X)!=1: return None
-    if X.date.values[0][-1]!=(currentTime-timedelta(minutes=1)): return None
+    lastDateInFeatures = X.date.values[0][-1]
+    if lastDateInFeatures!=(currentTime-timedelta(minutes=1)): return None
+    X.index=[lastDateInFeatures+timedelta(minutes=1)]
     return X
 
 _hasNulls= lambda x: len([t for t in x if pd.isnull(t)])>0
@@ -39,14 +46,12 @@ def _cleanTrainingData(X,y):
     X, y = X.loc[validRows], y.loc[validRows]
     return X, y
 
-def _createFeaturesFromTimeSeries(dt, pastStarts):
-    assert pastStarts>0, 'pastStart must be positive'
-    df = _pivotWindow(dt, pastStarts, -1, dt.columns)
+def _createFeaturesFromTimeSeries(dt, pastLen):
+    df = _pivotWindow(dt, pastLen-1, -1, dt.columns)
     return df
 
-def _createTargetFromTimeSeries(dt, futureEnds):
-    assert futureEnds<0, 'futureEnds must be negative'
-    df = _pivotWindow(dt, -1, futureEnds, dt.columns)
+def _createTargetFromTimeSeries(dt, futureLen):
+    df = _pivotWindow(dt, -1, -futureLen-1, dt.columns)
     nextMinuteValue =  df.consolidated.apply(lambda x:x[0])
     futureValue = df.consolidated.apply(lambda x:x[-1])
     t = (futureValue-nextMinuteValue)>0

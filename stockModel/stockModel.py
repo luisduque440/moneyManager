@@ -1,5 +1,5 @@
 from stockModel.generatePipeline import generateLinearPipeline
-from stockModel.createTrainingDataSet import createFeatures
+from stockModel.createTrainingDataSet import createFeaturesAtCurrentTime
 from stockModel.createTrainingDataSet import createTrainingDataSet
 
 class stockModel():
@@ -18,14 +18,16 @@ class stockModel():
         """ Method to be called every minute
         To do: if data is not 'reliable', return None
         """
-        df = createFeatures(self.stock, self.pastStarts+1, currentTime, self.pastStarts)
+        df = createFeaturesAtCurrentTime(self.stock, currentTime, self.pastStarts)
         self.df = df
-        return self.pipeline.predict_proba(df)[:,1][0]
+        probability = self.pipeline.predict_proba(df)[:,1][0] if len(df)==1 else None
+        return probability
 
     def fit(self, currentTime):
         """ Document asap
             There are at least two natural train-test splits to consider.
             Only considering one for now.
+            NOTE: y must be a pandas series, it is currently a dataframe (!!)
         """
         numSamples = self.trainSize + self.pastStarts - self.futureEnds
         X, y = createTrainingDataSet(self.stock, numSamples, currentTime, self.pastStarts, self.futureEnds)
