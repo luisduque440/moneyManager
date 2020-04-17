@@ -8,7 +8,7 @@ def createTrainingDataSet(stock, numSamples, currentTime, pastLen, futureLen, dr
     """
     X = createFeatures(stock, numSamples, currentTime, pastLen, dropDateColumns)
     y = createTarget(stock, numSamples, currentTime, futureLen, dropDateColumns)
-    X, y = _keepIndexesInBoth(X, y)
+    X, y = _keepRowsWithIndexesInBoth(X, y)
     return X, y
 
 
@@ -21,7 +21,7 @@ def createFeaturesAtCurrentTime(stock, currentTime, pastLen, dropDateColumns=Tru
     return X
 
 
-def createFeatures(stock, numSamples, currentTime, pastLen, dropDateColumns):
+def createFeatures(stock, numSamples, currentTime, pastLen, dropDateColumns=True):
     """ document
     """
     assert pastLen > 0, 'pastLen must be positive'
@@ -34,7 +34,7 @@ def createFeatures(stock, numSamples, currentTime, pastLen, dropDateColumns):
     if dropDateColumns: X=X.drop(columns='date')
     return X
 
-def createTarget(stock, numSamples, currentTime, futureLen, dropDateColumns):
+def createTarget(stock, numSamples, currentTime, futureLen, dropDateColumns=True):
     """ document
     """
     assert futureLen > 0, 'futureLen must be positive'
@@ -53,7 +53,7 @@ def createTarget(stock, numSamples, currentTime, futureLen, dropDateColumns):
 
 
 
-def _keepIndexesInBoth(X,y):
+def _keepRowsWithIndexesInBoth(X,y):
     idx = X.index.intersection(y.index)
     return X.loc[idx].copy(), y.loc[idx].copy()
 

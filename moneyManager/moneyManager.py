@@ -1,8 +1,7 @@
-
 import pandas as pd
 from stockModel.stockModel import stockModel
 from sklearnUtilities.precisionRecallUtilities import selectThreshold
-
+from stockModel.createTrainingDataSet import createTarget, _keepRowsWithIndexesInBoth
 class moneyManager():
 	"""
 		* Creates multiple stockModels and updates them minute by minute.
@@ -10,21 +9,21 @@ class moneyManager():
 		* The method updateThresholds decides if there is a threshold that makes the StockModel reliable
 		* If there is a valid threshold
 	"""
-	def __init__(self, stocks, pastStarts=20, futureEnds=-20, trainSize=1200, 
-		testSize=120, requiredPrecision=0.50, requiredRecall=0.05, requiredCertainty=0.9):
+	def __init__(self, stocks, pastLen=20, futureLen=20, trainSize=1200,
+		testSize=120, requiredPrecision=0.50, requiredRecall=0.05, requiredCertainty=0.85):
 		""" Document asap
 		"""
 		self.stocks = stocks
-		self.pastStarts = pastStarts
-		self.futureEnds = futureEnds
+		self.pastLen = pastLen
+		self.futureLen = futureLen
 		self.trainSize = trainSize
 		self.testSize = testSize
 		self.requiredPrecision = requiredPrecision
 		self.requiredRecall = requiredRecall
 		self.requiredCertainty = requiredCertainty
-		self.models = {s: stockModel(s, pastStarts, futureEnds, trainSize) for s in stocks}
+		self.models = {s: stockModel(s, pastLen, futureLen, trainSize) for s in stocks}
 		self.thresholds = {s: None for s in stocks}
-		self.testSets = {s: [] for s in stocks}
+		self.testSets = {pd.Series(): [] for s in stocks}
 		self.suggestions = [] 
 
 	def update(self, currentTime):
@@ -45,7 +44,7 @@ class moneyManager():
 		"""
 		print('training model for ', stock)
 		self.models[stock].fit(currentTime)
-		self.testSets[stock]=[]
+		self.testSets[stock]=pd.Series()
 
 	def updateThresholds(self, currentTime):
 		""" Document asap
@@ -58,29 +57,24 @@ class moneyManager():
 	def getThreshold(self, stock, currentTime):
 		""" Document asap. NEEDS WORK, very careful on how scores, and expected are merged.
 		"""
-		recordedScores = self.testSets[stock]
-		scores = pd.Series([r[1] for r in recordedScores], index=[r[0] for r in recordedScores])
-		#################################################################################################
-		expected = createTarget(stock, len(recordedScores), currentTime, self.futureEnds)
-		dg = pd.concat([scores, expected], axis=1, join='inner').dropna()
-		dg.columns = ['scores', 'expected']
-		self.dg = dg.copy() # for debugging
-		p,r,threshold,a = selectThreshold(dg.expected, dg.scores, self.requiredPrecision, self.requiredRecall, self.requiredCertainty)
+		precision, recall, certainty = self.requiredPrecision, self.requiredRecall, self.requiredCertainty
+		expected=createTarget(stock, len(recordedScores), currentTime, self.futureLen)
+		scores = self.testSets[stock]
+		expected, scores= _keepRowsWithIndexesInBoth(expected, scores)
+		_,_,threshold,_ = selectThreshold(expected, scores, precision, recall, certainty)
 		return threshold
+
 
 	def getLatestSuggestions(self, currentTime):
 		""" Document asap
 		"""
 		latestSuggestions = []
 		for s in self.stocks:
-			if self.testSetIsBig(s):
-				self.testSets[s].pop(0)
-
+			if self.testSetIsBig(s): self.testSets[s]=self.testSets[s][1:]
 			output = self.models[s].predict_proba(currentTime)
-			self.testSets[s].append((currentTime, output))
-
+			self.testSets[s] = self.testSets[s].append(pd.Series([output], index=[currentTime])))
 			threshold = self.thresholds[s]
-			thresholdedOutput = (threshold!=None and output>threshold) 
+			thresholdedOutput = (threshold!=None and output>threshold)
 			suggestion = ('buyAndKeep20mins', s, currentTime) if thresholdedOutput else ('none', s, currentTime)
 			latestSuggestions.append(suggestion)
 		return latestSuggestions

@@ -34,7 +34,6 @@ def _getBuySuggestions(moneyManagerSuggestions):
     """ document
     """
     buyMoneyManagerSuggestions = [b for b in moneyManagerSuggestions if b[0] == 'buyAndKeep20mins']
-    buySuggestions = {}
-    for s in self.stocks:
-        buySuggestions[s] = {b[2] for b in buyMoneyManagerSuggestions if b[1] == s}
+    stocks = {b[0] for b in buyMoneyManagerSuggestions}
+    buySuggestions = {s: {b[2] for b in buyMoneyManagerSuggestions if b[1] == s} for s in stocks}
     return buySuggestions
