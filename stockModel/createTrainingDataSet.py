@@ -3,26 +3,59 @@ from datetime import timedelta
 from loadData.loadTimeSeries import loadTimeSeries
 
 
-def createTrainingDataSet(stock, numSamples, currentTime, pastLen, futureLen):
+def createTrainingDataSet(stock, numSamples, currentTime, pastLen, futureLen, dropDateColumns=True):
     """ document
     """
-    X = _createFeatures(stock, numSamples, currentTime, pastLen)
-    y = _createTarget(stock, numSamples, currentTime, futureLen)
-    X, y = _keepRowsWithoutNaT(X), _keepRowsWithoutNaT(y)
+    X = createFeatures(stock, numSamples, currentTime, pastLen, dropDateColumns)
+    y = createTarget(stock, numSamples, currentTime, futureLen, dropDateColumns)
     X, y = _keepIndexesInBoth(X, y)
     return X, y
 
 
-def createFeaturesAtCurrentTime(stock, currentTime, pastLen):
+def createFeaturesAtCurrentTime(stock, currentTime, pastLen, dropDateColumns=True):
     """ document
     """
-    X = _createFeatures(stock, pastLen, currentTime, pastLen)
-    X = _keepRowsWithoutNaT(X)
+    X = createFeatures(stock, pastLen, currentTime, pastLen, dropDateColumns)
     if len(X)!=1: return None
-    lastDateInFeatures = X.date.values[0][-1]
-    if lastDateInFeatures!=(currentTime-timedelta(minutes=1)):
-        return None
+    if X.index[0]!=currentTime: return None
     return X
+
+
+def createFeatures(stock, numSamples, currentTime, pastLen, dropDateColumns):
+    """ document
+    """
+    assert pastLen > 0, 'pastLen must be positive'
+    dt = loadTimeSeries(stock, numSamples, currentTime)
+    dt['date'] = dt.index
+    X = _pivotWindow(dt, pastLen-1, -1, dt.columns)
+    lastFeatureDatePlusOneMinute = X.date.apply(lambda x: x[-1]).apply(lambda x:x+timedelta(minutes=1))
+    X.index = lastFeatureDatePlusOneMinute
+    X = _keepRowsWithoutNaT(X)
+    if dropDateColumns: X=X.drop(columns='date')
+    return X
+
+def createTarget(stock, numSamples, currentTime, futureLen, dropDateColumns):
+    """ document
+    """
+    assert futureLen > 0, 'futureLen must be positive'
+    dt = loadTimeSeries(stock, numSamples, currentTime)
+    dt['date'] = dt.index
+    df = _pivotWindow(dt, -1, -futureLen-1, dt.columns)
+    firstMinuteValue =  df.consolidated.apply(lambda x:x[0])
+    lastMinuteValue = df.consolidated.apply(lambda x:x[-1])
+    t = (lastMinuteValue-firstMinuteValue)>0
+    y = pd.DataFrame({'target': t, 'date': df.date})
+    firstMinuteDateTime = y.date.apply(lambda x: x[0]).values
+    y.index = firstMinuteDateTime
+    y = _keepRowsWithoutNaT(y)
+    if dropDateColumns: y = y.drop(columns='date').target
+    return y
+
+
+
+def _keepIndexesInBoth(X,y):
+    idx = X.index.intersection(y.index)
+    return X.loc[idx].copy(), y.loc[idx].copy()
 
 
 def _keepRowsWithoutNaT(df):
@@ -32,34 +65,6 @@ def _keepRowsWithoutNaT(df):
     validRows = df.date.apply(correctLen)
     df = df.loc[validRows].copy()
     return df
-
-
-def _keepIndexesInBoth(X,y):
-    idx = X.index.intersection(y.index)
-    return X.loc[idx].copy(), y.loc[idx].copy()
-
-
-def _createFeatures(stock, numSamples, currentTime, pastLen):
-    assert pastLen > 0, 'pastLen must be positive'
-    dt = loadTimeSeries(stock, numSamples, currentTime)
-    dt['date'] = dt.index
-    X = _pivotWindow(dt, pastLen-1, -1, dt.columns)
-    lastFeatureDatePlusOneMinute = X.date.apply(lambda x: x[-1]).apply(lambda x:x+timedelta(minutes=1))
-    X.index = lastFeatureDatePlusOneMinute
-    return X
-
-def _createTarget(stock, numSamples, currentTime, futureLen):
-    assert futureLen > 0, 'futureLen must be positive'
-    dt = loadTimeSeries(stock, numSamples, currentTime)
-    dt['date'] = dt.index
-    df = _pivotWindow(dt, -1, -futureLen-1, dt.columns)
-    nextMinuteValue =  df.consolidated.apply(lambda x:x[0])
-    futureValue = df.consolidated.apply(lambda x:x[-1])
-    t = (futureValue-nextMinuteValue)>0
-    y = pd.DataFrame({'target': t, 'date': df.date})
-    firstFutureDate = y.date.apply(lambda x: x[0]).values
-    y.index = firstFutureDate
-    return y
 
 
 def _pivotWindow(ds, start, end, columnsToPivot):
