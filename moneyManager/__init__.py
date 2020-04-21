@@ -1,5 +1,5 @@
 import pandas as pd
-from stockModel.stockModel import stockModel
+from stockModel import stockModel
 from sklearnUtilities.precisionRecallUtilities import selectThreshold
 from stockModel.createTrainingDataSet import createTarget, _keepRowsWithIndexesInBoth
 class moneyManager():
@@ -23,7 +23,7 @@ class moneyManager():
 		self.requiredCertainty = requiredCertainty
 		self.models = {s: stockModel(s, pastLen, futureLen, trainSize) for s in stocks}
 		self.thresholds = {s: None for s in stocks}
-		self.testSets = {pd.Series(): [] for s in stocks}
+		self.testSets = {s: pd.Series() for s in stocks}
 		self.suggestions = [] 
 
 	def update(self, currentTime):
@@ -72,7 +72,7 @@ class moneyManager():
 		for s in self.stocks:
 			if self.testSetIsBig(s): self.testSets[s]=self.testSets[s][1:]
 			output = self.models[s].predict_proba(currentTime)
-			self.testSets[s] = self.testSets[s].append(pd.Series([output], index=[currentTime])))
+			self.testSets[s] = self.testSets[s].append(pd.Series([output], index=[currentTime]))
 			threshold = self.thresholds[s]
 			thresholdedOutput = (threshold!=None and output>threshold)
 			suggestion = ('buyAndKeep20mins', s, currentTime) if thresholdedOutput else ('none', s, currentTime)

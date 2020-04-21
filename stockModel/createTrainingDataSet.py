@@ -1,6 +1,6 @@
 import pandas as pd
 from datetime import timedelta
-from loadData.loadTimeSeries import loadTimeSeries
+from loadData import loadTimeSeries
 
 
 def createTrainingDataSet(stock, numSamples, currentTime, pastLen, futureLen, dropDateColumns=True):

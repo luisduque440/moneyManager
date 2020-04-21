@@ -1,6 +1,9 @@
+import sys
+sys.path.append('/Users/lduque/Desktop/myProjects/moneyManager/')
 import unittest
+from moneyManager import moneyManager
 
-class TestStringMethods(unittest.TestCase):
+class test_moneyManager(unittest.TestCase):
 
     def test_upper(self):
         self.assertEqual('foo'.upper(), 'FOO')
