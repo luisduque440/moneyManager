@@ -25,17 +25,10 @@ class stockModel():
 
     def fit(self, currentTime):
         """ Document asap
-            There are at least two natural train-test splits to consider.
-            Only considering one for now.
-            NOTE: y must be a pandas series, it is currently a dataframe (!!)
         """
         numSamples = self.trainSize + self.pastStarts - self.futureEnds
         X, y = createTrainingDataSet(self.stock, numSamples, currentTime, self.pastStarts, self.futureEnds)
         X, y = X[self.pastStarts: self.futureEnds], y[self.pastStarts: self.futureEnds].apply(bool)
         self.pipeline = generateLinearPipeline()
         self.X, self.y = X, y
-        print(X)
-        print(X.shape)
-        print(y)
-        print(y.shape)
         self.pipeline.fit(X, y)
