@@ -2,3 +2,4 @@ venv-*
 *.csv
 *.ipynb_*
 *.txt
+*.DS_Store
